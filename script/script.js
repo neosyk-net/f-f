@@ -44,6 +44,7 @@ const STORAGE_KEY_UNFOLLOWED = "ig_unfollowed_usernames_v1";
 const STORAGE_KEY_TBD = "ig_tbd_usernames_v1";
 const STORAGE_KEY_PNF = "ig_page_not_found_usernames_v1";
 const STORAGE_KEY_VISITED = "ig_visited_usernames_v1";
+const STORAGE_KEY_PINNED = "ig_pinned_pending_usernames_v1";
 const STORAGE_KEY_THEME = "ig_theme_v1";
 const STORAGE_KEY_UNFOLLOW_EVENTS = "ig_unfollow_events_v1";
 const STORAGE_KEY_SAFETY_MODE = "ig_safety_mode_v1";
@@ -199,11 +200,12 @@ function startSafetyTicker(safetyMode) {
   }
 }
 
-function persistSets(unfollowedSet, tbdSet, pnfSet, visitedSet) {
+function persistSets(unfollowedSet, tbdSet, pnfSet, visitedSet, pinnedSet) {
   saveSet(STORAGE_KEY_UNFOLLOWED, unfollowedSet);
   saveSet(STORAGE_KEY_TBD, tbdSet);
   saveSet(STORAGE_KEY_PNF, pnfSet);
   saveSet(STORAGE_KEY_VISITED, visitedSet);
+  saveSet(STORAGE_KEY_PINNED, pinnedSet);
 }
 
 function loadTheme() {
@@ -344,13 +346,14 @@ function parseUsernames(entries, label) {
   };
 }
 
-function listHtml(arr, type, visitedSet, strictActionLocked = false) {
+function listHtml(arr, type, visitedSet, strictActionLocked = false, pinnedSet = new Set()) {
   return arr
     .map((username) => {
       const encodedUser = encodeURIComponent(username);
       const id = `chk_${encodedUser}`;
       const safeUser = escapeHtml(username);
       const checked = type === "done";
+      const pinned = type === "pending" && pinnedSet.has(username);
 
       const tbdButton =
         type === "pending"
@@ -366,7 +369,25 @@ function listHtml(arr, type, visitedSet, strictActionLocked = false) {
         type === "pending" || type === "tbd"
           ? `<button class="mini-btn" data-action="to-pnf" data-username="${encodedUser}">Not found</button>`
           : "";
+      const pinButton =
+        type === "pending"
+          ? `<button
+              class="pin-toggle${pinned ? " is-pinned" : ""}"
+              data-action="${pinned ? "unpin" : "pin"}"
+              data-username="${encodedUser}"
+              aria-label="${pinned ? "Unpin" : "Pin"} @${safeUser}"
+              title="${pinned ? "Unpin" : "Pin"} @${safeUser}"
+            >
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <g transform="translate(24 0) scale(-1 1) rotate(-28 12 12)">
+                  <path d="M12 17v4"></path>
+                  <path d="M7 3h10l-2 5 2 2v2h-4l-1 1-1-1H7v-2l2-2z"></path>
+                </g>
+              </svg>
+            </button>`
+          : "";
       const visitedClass = visitedSet.has(username) ? " visited-row" : "";
+      const pinnedClass = pinned ? " pinned-row" : "";
       const disableUnfollow = strictActionLocked && type !== "done";
       const rowControl = disableUnfollow
         ? `<span class="row-lock" aria-label="Locked in strict mode" title="Locked in strict mode">
@@ -378,7 +399,7 @@ function listHtml(arr, type, visitedSet, strictActionLocked = false) {
         : `<input type="checkbox" id="${id}" data-username="${encodedUser}" ${checked ? "checked" : ""} />`;
 
       return `
-        <div class="user-row${visitedClass}">
+        <div class="user-row${visitedClass}${pinnedClass}">
           ${rowControl}
           <button
             type="button"
@@ -396,6 +417,7 @@ function listHtml(arr, type, visitedSet, strictActionLocked = false) {
             </span>
           </button>
           <div class="row-tools">
+            ${pinButton}
             ${pendingButton}
             ${tbdButton}
             ${pnfButton}
@@ -454,6 +476,7 @@ function renderResults({
   tbdSet,
   pnfSet,
   visitedSet,
+  pinnedSet,
   unfollowEvents,
   followedAtByUsername,
   verifyLookups,
@@ -486,7 +509,10 @@ function renderResults({
   const q = norm(query);
   const byQuery = (u) => !q || u.includes(q);
 
-  const pending = sortUsernames(pendingAll.filter(byQuery), sort, followedAtByUsername);
+  const sortedPending = sortUsernames(pendingAll.filter(byQuery), sort, followedAtByUsername);
+  const pendingPinned = sortedPending.filter((u) => pinnedSet.has(u));
+  const pendingUnpinned = sortedPending.filter((u) => !pinnedSet.has(u));
+  const pending = [...pendingPinned, ...pendingUnpinned];
   const tbd = sortUsernames(tbdAll.filter(byQuery), sort, followedAtByUsername);
   const pnf = sortUsernames(pnfAll.filter(byQuery), sort, followedAtByUsername);
   const done = sortUsernames(doneAll.filter(byQuery), sort, followedAtByUsername);
@@ -637,7 +663,7 @@ function renderResults({
           <div id="pendingList" class="list-box">
             <div class="list-scroll">
               ${safetyMode === "strict" && strictLocked ? `<p class="lock-banner">Unfollow is locked right now. You can still move users to TBD or Not Found.</p>` : ""}
-              ${pending.length ? listHtml(pending, "pending", visitedSet, strictLocked) : `<div class="empty">No pending users.</div>`}
+              ${pending.length ? listHtml(pending, "pending", visitedSet, strictLocked, pinnedSet) : `<div class="empty">No pending users.</div>`}
             </div>
           </div>
         </section>
@@ -650,7 +676,7 @@ function renderResults({
             </div>
             <div id="doneList" class="list-box ${showDone ? "" : "collapsed"}">
               <div class="list-scroll">
-                ${done.length ? listHtml(done, "done", visitedSet, strictLocked) : `<div class="empty">Nothing here yet.</div>`}
+                ${done.length ? listHtml(done, "done", visitedSet, strictLocked, pinnedSet) : `<div class="empty">Nothing here yet.</div>`}
               </div>
             </div>
             ${showDone ? "" : `<p class="meta-line">Unfollowed list is collapsed.</p>`}
@@ -663,7 +689,7 @@ function renderResults({
             </div>
             <div id="tbdList" class="list-box ${showTbd ? "" : "collapsed"}">
               <div class="list-scroll">
-                ${tbd.length ? listHtml(tbd, "tbd", visitedSet, strictLocked) : `<div class="empty">Nothing in TBD.</div>`}
+                ${tbd.length ? listHtml(tbd, "tbd", visitedSet, strictLocked, pinnedSet) : `<div class="empty">Nothing in TBD.</div>`}
               </div>
             </div>
             ${showTbd ? "" : `<p class="meta-line">TBD list is collapsed.</p>`}
@@ -676,7 +702,7 @@ function renderResults({
             </div>
             <div id="pnfList" class="list-box ${showPnf ? "" : "collapsed"}">
               <div class="list-scroll">
-                ${pnf.length ? listHtml(pnf, "pnf", visitedSet, strictLocked) : `<div class="empty">Nothing in Page Not Found.</div>`}
+                ${pnf.length ? listHtml(pnf, "pnf", visitedSet, strictLocked, pinnedSet) : `<div class="empty">Nothing in Page Not Found.</div>`}
               </div>
             </div>
             ${showPnf ? "" : `<p class="meta-line">Page Not Found list is collapsed.</p>`}
@@ -700,6 +726,7 @@ function renderResults({
       tbdSet,
       pnfSet,
       visitedSet,
+      pinnedSet,
       unfollowEvents,
       followedAtByUsername,
       verifyLookups,
@@ -886,7 +913,8 @@ function renderResults({
         unfollowedSet.add(username);
         tbdSet.delete(username);
         pnfSet.delete(username);
-        persistSets(unfollowedSet, tbdSet, pnfSet, visitedSet);
+        pinnedSet.delete(username);
+        persistSets(unfollowedSet, tbdSet, pnfSet, visitedSet, pinnedSet);
         rerenderPreservingScroll({ ...getUiState(), safetyMode, rateNotice: "" });
       };
 
@@ -902,7 +930,7 @@ function renderResults({
       unfollowedSet.delete(username);
     }
 
-    persistSets(unfollowedSet, tbdSet, pnfSet, visitedSet);
+    persistSets(unfollowedSet, tbdSet, pnfSet, visitedSet, pinnedSet);
     rerenderPreservingScroll({ ...getUiState(), safetyMode, rateNotice: "" });
   };
 
@@ -934,7 +962,7 @@ function renderResults({
       if (encoded) {
         const username = decodeURIComponent(encoded);
         visitedSet.add(username);
-        persistSets(unfollowedSet, tbdSet, pnfSet, visitedSet);
+        persistSets(unfollowedSet, tbdSet, pnfSet, visitedSet, pinnedSet);
         const row = link.closest(".user-row");
         if (row) row.classList.add("visited-row");
       }
@@ -980,17 +1008,30 @@ function renderResults({
     if (!action || !encodedUsername) return;
 
     const username = decodeURIComponent(encodedUsername);
+    if (action === "pin" || action === "unpin") {
+      if (action === "pin") {
+        pinnedSet.add(username);
+      } else {
+        pinnedSet.delete(username);
+      }
+      persistSets(unfollowedSet, tbdSet, pnfSet, visitedSet, pinnedSet);
+      rerenderPreservingScroll(getUiState());
+      return;
+    }
+
     animateMove(action, button, () => {
       if (action === "to-tbd") {
         tbdSet.add(username);
         unfollowedSet.delete(username);
         pnfSet.delete(username);
+        pinnedSet.delete(username);
       }
 
       if (action === "to-pnf") {
         pnfSet.add(username);
         tbdSet.delete(username);
         unfollowedSet.delete(username);
+        pinnedSet.delete(username);
       }
 
       if (action === "to-pending") {
@@ -999,7 +1040,7 @@ function renderResults({
         unfollowedSet.delete(username);
       }
 
-      persistSets(unfollowedSet, tbdSet, pnfSet, visitedSet);
+      persistSets(unfollowedSet, tbdSet, pnfSet, visitedSet, pinnedSet);
       rerenderPreservingScroll(getUiState());
     });
   };
@@ -1049,7 +1090,8 @@ function renderResults({
     tbdSet.clear();
     pnfSet.clear();
     visitedSet.clear();
-    persistSets(unfollowedSet, tbdSet, pnfSet, visitedSet);
+    pinnedSet.clear();
+    persistSets(unfollowedSet, tbdSet, pnfSet, visitedSet, pinnedSet);
     saveStrictCooldownUntil(0);
     rerender({ query: "", sort: "az", verifyQuery: "", rateNotice: "", safetyMode, showDone: false, showTbd: false, showPnf: false, theme: activeTheme });
   };
@@ -1105,6 +1147,7 @@ async function main() {
     const tbdSet = loadSet(STORAGE_KEY_TBD);
     const pnfSet = loadSet(STORAGE_KEY_PNF);
     const visitedSet = loadSet(STORAGE_KEY_VISITED);
+    const pinnedSet = loadSet(STORAGE_KEY_PINNED);
     let unfollowEvents = pruneUnfollowEvents(loadUnfollowEvents());
     const safetyMode = loadSafetyMode();
     if (getStrictCooldownRemaining() <= 0) {
@@ -1125,8 +1168,12 @@ async function main() {
     for (const username of [...visitedSet]) {
       if (!allSet.has(username)) visitedSet.delete(username);
     }
+    for (const username of [...pinnedSet]) {
+      const isPending = allSet.has(username) && !unfollowedSet.has(username) && !tbdSet.has(username) && !pnfSet.has(username);
+      if (!isPending) pinnedSet.delete(username);
+    }
 
-    persistSets(unfollowedSet, tbdSet, pnfSet, visitedSet);
+    persistSets(unfollowedSet, tbdSet, pnfSet, visitedSet, pinnedSet);
     saveUnfollowEvents(unfollowEvents);
 
     renderResults({
@@ -1135,6 +1182,7 @@ async function main() {
       tbdSet,
       pnfSet,
       visitedSet,
+      pinnedSet,
       unfollowEvents,
       followedAtByUsername,
       verifyLookups: {

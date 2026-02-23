@@ -156,6 +156,23 @@ function getStrictCooldownRemaining(now = Date.now()) {
   return Math.max(0, until - now);
 }
 
+function getSafetyStatusHtml(safetyMode, rate, cooldownRemaining) {
+  if (safetyMode === "risk") return "Risk mode active";
+
+  if (cooldownRemaining > 0) {
+    const clamped = Math.max(0, Math.min(WINDOW_90_MIN_MS, cooldownRemaining));
+    const ringDeg = Math.round((clamped / WINDOW_90_MIN_MS) * 360);
+    return `<span class="safety-status-with-ring"><span class="status-ring" style="--ring-deg:${ringDeg}deg" aria-hidden="true"></span><span>Strict mode: <span class="status-locked-word">Locked ${msToClock(cooldownRemaining)}</span></span></span>`;
+  }
+
+  if (rate.canUnfollow) {
+    return 'Strict mode: <span class="status-ready-word">Ready</span>';
+  }
+
+  const waitMs = rate.wait90 > 0 ? rate.wait90 : rate.wait24;
+  return `Strict mode: <span class="status-locked-word">Locked ${msToClock(waitMs)}</span>`;
+}
+
 function stopSafetyTicker() {
   if (safetyTickerId) {
     clearInterval(safetyTickerId);
@@ -171,24 +188,22 @@ function updateSafetyStatus(safetyMode) {
   saveUnfollowEvents(events);
   const rate = getRateState(events);
   const cooldownRemaining = getStrictCooldownRemaining();
+  updateSafetyMeters(rate, safetyMode, cooldownRemaining);
+  statusEl.innerHTML = getSafetyStatusHtml(safetyMode, rate, cooldownRemaining);
+}
 
-  if (safetyMode === "risk") {
-    statusEl.textContent = "Risk mode active";
-    return;
-  }
+function updateSafetyMeters(rate, safetyMode = "strict", cooldownRemaining = 0) {
+  const ninetyLabel = document.getElementById("limit-90-label");
+  const twentyFourLabel = document.getElementById("limit-24-label");
+  const ninetyFill = document.getElementById("limit-90-fill");
+  const twentyFourFill = document.getElementById("limit-24-fill");
+  const forceNinetyFull = safetyMode === "strict" && cooldownRemaining > 0;
+  const ninetyPct = forceNinetyFull ? 100 : Math.min(100, (rate.used90 / LIMIT_90_MIN) * 100);
 
-  if (cooldownRemaining > 0) {
-    statusEl.innerHTML = `Strict mode: <span class="status-locked-word">Locked ${msToClock(cooldownRemaining)}</span>`;
-    return;
-  }
-
-  if (rate.canUnfollow) {
-    statusEl.innerHTML = 'Strict mode: <span class="status-ready-word">Ready</span>';
-    return;
-  }
-
-  const waitMs = rate.wait90 > 0 ? rate.wait90 : rate.wait24;
-  statusEl.innerHTML = `Strict mode: <span class="status-locked-word">Locked ${msToClock(waitMs)}</span>`;
+  if (ninetyLabel) ninetyLabel.textContent = `90 min: ${rate.used90}/${LIMIT_90_MIN}`;
+  if (twentyFourLabel) twentyFourLabel.textContent = `24 hr: ${rate.used24}/${LIMIT_24_HOUR}`;
+  if (ninetyFill) ninetyFill.style.width = `${ninetyPct}%`;
+  if (twentyFourFill) twentyFourFill.style.width = `${Math.min(100, (rate.used24 / LIMIT_24_HOUR) * 100)}%`;
 }
 
 function startSafetyTicker(safetyMode) {
@@ -399,7 +414,7 @@ function listHtml(arr, type, visitedSet, strictActionLocked = false, pinnedSet =
         : `<input type="checkbox" id="${id}" data-username="${encodedUser}" ${checked ? "checked" : ""} />`;
 
       return `
-        <div class="user-row${visitedClass}${pinnedClass}">
+        <div class="user-row${visitedClass}${pinnedClass}" data-row-username="${encodedUser}">
           ${rowControl}
           <button
             type="button"
@@ -539,6 +554,9 @@ function renderResults({
 
   const dailySegmentCount = 6;
   const filledDailySegments = Math.min(dailySegmentCount, Math.floor(rateState.used24 / 10));
+  const ninetyFillPct = safetyMode === "strict" && strictCooldownRemaining > 0
+    ? 100
+    : Math.min(100, (rateState.used90 / LIMIT_90_MIN) * 100);
   const dailySegmentsHtml = Array.from({ length: dailySegmentCount }, (_, i) =>
     `<span class="quota-segment ${i < filledDailySegments ? "filled" : ""}"></span>`
   ).join("");
@@ -586,15 +604,15 @@ function renderResults({
         <div class="limit-box ${safetyMode === "strict" && strictLocked ? "limit-box-warning" : ""}">
           <div class="limit-head">
             <b>Safety Limits</b>
-            <span id="safety-status">${safetyMode === "strict" && strictCooldownRemaining > 0 ? `Strict mode: <span class="status-locked-word">Locked ${msToClock(strictCooldownRemaining)}</span>` : ""}</span>
+            <span id="safety-status">${getSafetyStatusHtml(safetyMode, rateStateRaw, strictCooldownRemaining)}</span>
           </div>
           <div class="limit-row">
-            <div>90 min: ${rateState.used90}/${LIMIT_90_MIN}</div>
-            <div class="limit-track"><div class="limit-fill" style="width:${Math.min(100, (rateState.used90 / LIMIT_90_MIN) * 100)}%"></div></div>
+            <div id="limit-90-label">90 min: ${rateState.used90}/${LIMIT_90_MIN}</div>
+            <div class="limit-track"><div id="limit-90-fill" class="limit-fill" style="width:${ninetyFillPct}%"></div></div>
           </div>
           <div class="limit-row">
-            <div>24 hr: ${rateState.used24}/${LIMIT_24_HOUR}</div>
-            <div class="limit-track"><div class="limit-fill" style="width:${Math.min(100, (rateState.used24 / LIMIT_24_HOUR) * 100)}%"></div></div>
+            <div id="limit-24-label">24 hr: ${rateState.used24}/${LIMIT_24_HOUR}</div>
+            <div class="limit-track"><div id="limit-24-fill" class="limit-fill" style="width:${Math.min(100, (rateState.used24 / LIMIT_24_HOUR) * 100)}%"></div></div>
           </div>
           <p class="meta-line">${escapeHtml(rateNotice || (safetyMode === "strict"
             ? "Strict mode locks for a full 90 minutes once you hit 10 unfollows."
@@ -642,21 +660,21 @@ function renderResults({
             <span class="pending-flow">
               <span class="pending-step">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3h7v7"></path><path d="M10 14 21 3"></path><path d="M21 14v7h-7"></path><path d="M3 10V3h7"></path><path d="m3 3 7 7"></path></svg>
-                Open profile
+                Open
               </span>
               <span class="pending-sep" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"></path></svg>
               </span>
               <span class="pending-step">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16"></path><path d="m14 6 6 6-6 6"></path></svg>
-                Unfollow on IG
+                Unfollow
               </span>
               <span class="pending-sep" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"></path></svg>
               </span>
               <span class="pending-step">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20 6-11 11-5-5"></path></svg>
-                Check it
+                Check
               </span>
             </span>
           </h2>
@@ -781,20 +799,87 @@ function renderResults({
     return state;
   };
 
-  const restoreListScroll = (state) => {
+  const restoreListScroll = (state, defer = true) => {
     if (!state) return;
-    requestAnimationFrame(() => {
+    const apply = () => {
       for (const [id, top] of Object.entries(state)) {
         const el = getListScroller(id);
         if (el) el.scrollTop = Number(top) || 0;
       }
-    });
+    };
+    if (defer) {
+      requestAnimationFrame(apply);
+      return;
+    }
+    apply();
   };
 
   const rerenderPreservingScroll = (next) => {
     const scrollState = captureListScroll();
     rerender(next);
     restoreListScroll(scrollState);
+  };
+
+  const animatePendingReorder = (next) => {
+    const pendingBefore = document.getElementById("pendingList");
+    const beforeRows = pendingBefore
+      ? [...pendingBefore.querySelectorAll(".user-row[data-row-username]")]
+      : [];
+    const scrollState = captureListScroll();
+
+    if (!beforeRows.length) {
+      rerender(next);
+      restoreListScroll(scrollState, false);
+      return;
+    }
+
+    const firstTopByUser = new Map();
+    for (const row of beforeRows) {
+      const key = row.dataset.rowUsername || "";
+      if (key) firstTopByUser.set(key, row.getBoundingClientRect().top);
+    }
+
+    rerender(next);
+    restoreListScroll(scrollState, false);
+
+    const pendingAfter = document.getElementById("pendingList");
+    if (!pendingAfter) return;
+
+    const afterRows = [...pendingAfter.querySelectorAll(".user-row[data-row-username]")];
+    const movedRows = [];
+
+    for (const row of afterRows) {
+      const key = row.dataset.rowUsername || "";
+      const firstTop = firstTopByUser.get(key);
+      if (typeof firstTop !== "number") continue;
+
+      const dy = firstTop - row.getBoundingClientRect().top;
+      if (Math.abs(dy) < 1) continue;
+
+      row.style.transition = "none";
+      row.style.transform = `translateY(${dy}px)`;
+      row.style.opacity = "0.55";
+      movedRows.push(row);
+    }
+
+    if (!movedRows.length) return;
+
+    requestAnimationFrame(() => {
+      for (const row of movedRows) {
+        row.style.transition = "transform 280ms cubic-bezier(0.22, 1, 0.36, 1), opacity 280ms ease";
+        row.style.transform = "translateY(0)";
+        row.style.opacity = "1";
+        row.addEventListener(
+          "transitionend",
+          () => {
+            row.style.removeProperty("transition");
+            row.style.removeProperty("transform");
+            row.style.removeProperty("opacity");
+          },
+          { once: true }
+        );
+      }
+    });
   };
 
   const rerenderWithSearchFocus = (next, caretPos) => {
@@ -940,9 +1025,11 @@ function renderResults({
 
     const copyButton = target.closest(".username-copy");
     if (copyButton instanceof HTMLButtonElement) {
+      const blurAfterCopy = e instanceof MouseEvent && e.detail > 0;
       const encoded = copyButton.dataset.copyUsername;
       if (!encoded) return;
       const username = decodeURIComponent(encoded);
+      if (blurAfterCopy) copyButton.blur();
       copyTextToClipboard(username).then((ok) => {
         const original = copyButton.title;
         copyButton.title = ok ? "Copied!" : "Copy failed";
@@ -1015,7 +1102,7 @@ function renderResults({
         pinnedSet.delete(username);
       }
       persistSets(unfollowedSet, tbdSet, pnfSet, visitedSet, pinnedSet);
-      rerenderPreservingScroll(getUiState());
+      animatePendingReorder(getUiState());
       return;
     }
 

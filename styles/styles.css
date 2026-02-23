@@ -400,6 +400,30 @@ h2 {
   font-weight: 600;
 }
 
+.safety-status-with-ring {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-ring {
+  --ring-deg: 360deg;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  position: relative;
+  background: conic-gradient(var(--accent) var(--ring-deg), color-mix(in srgb, var(--line) 72%, transparent) 0);
+}
+
+.status-ring::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: var(--list-bg);
+}
+
 .status-locked-word {
   color: var(--danger);
 }

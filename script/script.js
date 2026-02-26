@@ -194,16 +194,12 @@ function updateSafetyStatus(safetyMode) {
 
 function updateSafetyMeters(rate, safetyMode = "strict", cooldownRemaining = 0) {
   const ninetyLabel = document.getElementById("limit-90-label");
-  const twentyFourLabel = document.getElementById("limit-24-label");
   const ninetyFill = document.getElementById("limit-90-fill");
-  const twentyFourFill = document.getElementById("limit-24-fill");
   const forceNinetyFull = safetyMode === "strict" && cooldownRemaining > 0;
   const ninetyPct = forceNinetyFull ? 100 : Math.min(100, (rate.used90 / LIMIT_90_MIN) * 100);
 
   if (ninetyLabel) ninetyLabel.textContent = `90 min: ${rate.used90}/${LIMIT_90_MIN}`;
-  if (twentyFourLabel) twentyFourLabel.textContent = `24 hr: ${rate.used24}/${LIMIT_24_HOUR}`;
   if (ninetyFill) ninetyFill.style.width = `${ninetyPct}%`;
-  if (twentyFourFill) twentyFourFill.style.width = `${Math.min(100, (rate.used24 / LIMIT_24_HOUR) * 100)}%`;
 }
 
 function startSafetyTicker(safetyMode) {
@@ -497,7 +493,7 @@ function renderResults({
   verifyLookups,
   safetyMode = "strict",
   query = "",
-  sort = "az",
+  sort = "latest",
   verifyQuery = "",
   rateNotice = "",
   diagnostics,
@@ -557,12 +553,25 @@ function renderResults({
   const ninetyFillPct = safetyMode === "strict" && strictCooldownRemaining > 0
     ? 100
     : Math.min(100, (rateState.used90 / LIMIT_90_MIN) * 100);
+  const pendingSafetyCount = safetyMode === "strict" && strictCooldownRemaining > 0
+    ? LIMIT_90_MIN
+    : Math.min(LIMIT_90_MIN, rateState.used90);
+  const pendingSafetyDotsHtml = Array.from({ length: LIMIT_90_MIN }, (_, i) =>
+    `<span class="pending-safety-dot ${i < pendingSafetyCount ? "is-filled" : ""}" style="--dot-index:${i};"></span>`
+  ).join("");
   const dailySegmentsHtml = Array.from({ length: dailySegmentCount }, (_, i) =>
     `<span class="quota-segment ${i < filledDailySegments ? "filled" : ""}"></span>`
   ).join("");
   const dataLine = diagnostics
     ? `Compared ${diagnostics.followers.unique} followers vs ${diagnostics.following.unique} following.`
     : "";
+  const sortLabelByValue = {
+    latest: "Sort Latest",
+    earliest: "Sort Earliest",
+    az: "Sort A-Z",
+    za: "Sort Z-A"
+  };
+  const currentSortLabel = sortLabelByValue[sort] || sortLabelByValue.az;
 
   root.innerHTML = `
     <div class="app-page">
@@ -579,28 +588,6 @@ function renderResults({
           </div>
         </div>
 
-        <div class="stats-row">
-          <div><b>Total:</b> ${all.length}</div>
-          <div><b>Pending:</b> ${pendingAll.length}</div>
-          <div><b>TBD:</b> ${tbdAll.length}</div>
-          <div><b>Not found:</b> ${pnfAll.length}</div>
-          <div><b>Unfollowed:</b> ${doneAll.length}</div>
-          <div class="stats-help-cell">
-            <button
-              type="button"
-              class="stats-help"
-              aria-label="Stats legend"
-            >?</button>
-            <div class="stats-help-tip" role="tooltip">
-              <p><b>Total:</b><span>all flagged accounts currently in this sweep.</span></p>
-              <p><b>Pending:</b><span>not checked yet.</span></p>
-              <p><b>TBD:</b><span>set aside to review later.</span></p>
-              <p><b>Not found:</b><span>profile could not be reached.</span></p>
-              <p><b>Unfollowed:</b><span>accounts you already marked done.</span></p>
-            </div>
-          </div>
-        </div>
-
         <div class="limit-box ${safetyMode === "strict" && strictLocked ? "limit-box-warning" : ""}">
           <div class="limit-head">
             <b>Safety Limits</b>
@@ -610,16 +597,10 @@ function renderResults({
             <div id="limit-90-label">90 min: ${rateState.used90}/${LIMIT_90_MIN}</div>
             <div class="limit-track"><div id="limit-90-fill" class="limit-fill" style="width:${ninetyFillPct}%"></div></div>
           </div>
-          <div class="limit-row">
-            <div id="limit-24-label">24 hr: ${rateState.used24}/${LIMIT_24_HOUR}</div>
-            <div class="limit-track"><div id="limit-24-fill" class="limit-fill" style="width:${Math.min(100, (rateState.used24 / LIMIT_24_HOUR) * 100)}%"></div></div>
-          </div>
-          <p class="meta-line">${escapeHtml(rateNotice || (safetyMode === "strict"
+          <p class="meta-line safety-mode-copy">${escapeHtml(rateNotice || (safetyMode === "strict"
             ? "Strict mode locks for a full 90 minutes once you hit 10 unfollows."
             : "Risk mode removes lock enforcement. Use carefully."))}</p>
         </div>
-
-        ${dataLine ? `<p class="meta-line">${escapeHtml(dataLine)}</p>` : ""}
 
         <div class="quota-block" aria-label="daily unfollow quota">
           <div class="quota-head">
@@ -641,14 +622,45 @@ function renderResults({
       </section>
 
       <section class="panel search-panel">
+        ${dataLine ? `<p class="meta-line search-panel-headline">${escapeHtml(dataLine)}</p>` : ""}
+        <div class="stats-row">
+          <div><b>Total:</b> ${all.length}</div>
+          <div><b>Pending:</b> ${pendingAll.length}</div>
+          <div><b>TBD:</b> ${tbdAll.length}</div>
+          <div><b>Not found:</b> ${pnfAll.length}</div>
+          <div><b>Unfollowed:</b> ${doneAll.length}</div>
+          <div class="stats-help-cell">
+            <button
+              type="button"
+              class="stats-help"
+              aria-label="Stats legend"
+            >?</button>
+            <div class="stats-help-tip" role="tooltip">
+              <p><b>Total:</b><span>all flagged accounts currently in this sweep.</span></p>
+              <p><b>Pending:</b><span>not checked yet.</span></p>
+              <p><b>TBD:</b><span>set aside to review later.</span></p>
+              <p><b>Not found:</b><span>profile could not be reached.</span></p>
+              <p><b>Unfollowed:</b><span>accounts you already marked done.</span></p>
+            </div>
+          </div>
+        </div>
         <div class="toolbar">
           <input id="search-input" type="text" placeholder="Search username" value="${escapeHtml(query)}" autocomplete="off" autocapitalize="none" spellcheck="false" />
-          <select id="sort-select">
-            <option value="latest" ${sort === "latest" ? "selected" : ""}>Sort Latest</option>
-            <option value="earliest" ${sort === "earliest" ? "selected" : ""}>Sort Earliest</option>
-            <option value="az" ${sort === "az" ? "selected" : ""}>Sort A-Z</option>
-            <option value="za" ${sort === "za" ? "selected" : ""}>Sort Z-A</option>
-          </select>
+          <div id="sort-dropdown" class="sort-dropdown">
+            <button id="sort-trigger" type="button" class="sort-trigger" aria-haspopup="listbox" aria-expanded="false">${currentSortLabel}</button>
+            <div class="sort-options" role="listbox" aria-label="Sort options">
+              <button type="button" class="sort-option ${sort === "latest" ? "is-active" : ""}" data-sort="latest">Sort Latest</button>
+              <button type="button" class="sort-option ${sort === "earliest" ? "is-active" : ""}" data-sort="earliest">Sort Earliest</button>
+              <button type="button" class="sort-option ${sort === "az" ? "is-active" : ""}" data-sort="az">Sort A-Z</button>
+              <button type="button" class="sort-option ${sort === "za" ? "is-active" : ""}" data-sort="za">Sort Z-A</button>
+            </div>
+            <select id="sort-select" class="sort-select-native" aria-hidden="true" tabindex="-1">
+              <option value="latest" ${sort === "latest" ? "selected" : ""}>Sort Latest</option>
+              <option value="earliest" ${sort === "earliest" ? "selected" : ""}>Sort Earliest</option>
+              <option value="az" ${sort === "az" ? "selected" : ""}>Sort A-Z</option>
+              <option value="za" ${sort === "za" ? "selected" : ""}>Sort Z-A</option>
+            </select>
+          </div>
         </div>
         <p id="search-status" class="meta-line search-status"></p>
       </section>
@@ -656,7 +668,12 @@ function renderResults({
       <div class="lists-grid">
         <section class="panel list-panel left-column">
           <h2 class="pending-heading">
-            Pending
+            <span class="pending-heading-main">
+              <span>Pending</span>
+              <span class="pending-safety-chip" aria-label="90 minute safety counter">
+                <span class="pending-safety-ring" aria-hidden="true">${pendingSafetyDotsHtml}</span>
+              </span>
+            </span>
             <span class="pending-flow">
               <span class="pending-step">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3h7v7"></path><path d="M10 14 21 3"></path><path d="M21 14v7h-7"></path><path d="M3 10V3h7"></path><path d="m3 3 7 7"></path></svg>
@@ -715,7 +732,7 @@ function renderResults({
 
           <section class="panel list-panel">
             <div class="section-head">
-              <h2>Page Not Found</h2>
+              <h2>Not Found</h2>
               <button id="toggle-pnf" class="mini-btn">${showPnf ? "Hide" : "Show"} (${pnfAll.length})</button>
             </div>
             <div id="pnfList" class="list-box ${showPnf ? "" : "collapsed"}">
@@ -723,7 +740,7 @@ function renderResults({
                 ${pnf.length ? listHtml(pnf, "pnf", visitedSet, strictLocked, pinnedSet) : `<div class="empty">Nothing in Page Not Found.</div>`}
               </div>
             </div>
-            ${showPnf ? "" : `<p class="meta-line">Page Not Found list is collapsed.</p>`}
+            ${showPnf ? "" : `<p class="meta-line">Not found list is collapsed.</p>`}
           </section>
 
           <div class="right-footer">
@@ -942,7 +959,7 @@ function renderResults({
 
   const getUiState = () => ({
     query: document.getElementById("search-input")?.value || "",
-    sort: document.getElementById("sort-select")?.value || "az",
+    sort: document.getElementById("sort-select")?.value || "latest",
     verifyQuery: document.getElementById("verify-input")?.value || "",
     rateNotice,
     safetyMode,
@@ -1022,6 +1039,14 @@ function renderResults({
   root.onclick = (e) => {
     const target = e.target;
     if (!(target instanceof Element)) return;
+    const sortDropdown = document.getElementById("sort-dropdown");
+    const sortTriggerEl = document.getElementById("sort-trigger");
+    if (sortDropdown && !target.closest("#sort-dropdown")) {
+      sortDropdown.classList.remove("is-open");
+      if (sortTriggerEl instanceof HTMLButtonElement) {
+        sortTriggerEl.setAttribute("aria-expanded", "false");
+      }
+    }
 
     const copyButton = target.closest(".username-copy");
     if (copyButton instanceof HTMLButtonElement) {
@@ -1039,6 +1064,31 @@ function renderResults({
           copyButton.classList.remove("copied", "copy-failed");
         }, 700);
       });
+      return;
+    }
+
+    const sortTrigger = target.closest("button#sort-trigger");
+    if (sortTrigger instanceof HTMLButtonElement) {
+      const nextOpen = !sortDropdown?.classList.contains("is-open");
+      sortDropdown?.classList.toggle("is-open", nextOpen);
+      sortTrigger.setAttribute("aria-expanded", nextOpen ? "true" : "false");
+      return;
+    }
+
+    const sortOption = target.closest("button.sort-option");
+    if (sortOption instanceof HTMLButtonElement) {
+      const nextSort = sortOption.dataset.sort;
+      const sortSelectEl = document.getElementById("sort-select");
+      if (!nextSort || !(sortSelectEl instanceof HTMLSelectElement)) return;
+      if (sortSelectEl.value !== nextSort) {
+        sortSelectEl.value = nextSort;
+        sortSelectEl.dispatchEvent(new Event("change", { bubbles: true }));
+      } else {
+        sortDropdown?.classList.remove("is-open");
+        if (sortTriggerEl instanceof HTMLButtonElement) {
+          sortTriggerEl.setAttribute("aria-expanded", "false");
+        }
+      }
       return;
     }
 
@@ -1139,7 +1189,7 @@ function renderResults({
     const caretPos = e.target instanceof HTMLInputElement
       ? (e.target.selectionStart ?? nextQuery.length)
       : nextQuery.length;
-    const nextSort = document.getElementById("sort-select")?.value || "az";
+    const nextSort = document.getElementById("sort-select")?.value || "latest";
     const nextVerify = document.getElementById("verify-input")?.value || "";
     setSearchLoadingState(true);
     if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
@@ -1158,7 +1208,7 @@ function renderResults({
 
   const sortSelect = document.getElementById("sort-select");
   if (sortSelect) sortSelect.onchange = (e) => {
-    const nextSort = e.target instanceof HTMLSelectElement ? e.target.value : "az";
+    const nextSort = e.target instanceof HTMLSelectElement ? e.target.value : "latest";
     const nextQuery = document.getElementById("search-input")?.value || "";
     const nextVerify = document.getElementById("verify-input")?.value || "";
     rerender({ query: nextQuery, sort: nextSort, verifyQuery: nextVerify, rateNotice, showDone, showTbd, showPnf, theme: activeTheme, safetyMode });
@@ -1180,7 +1230,7 @@ function renderResults({
     pinnedSet.clear();
     persistSets(unfollowedSet, tbdSet, pnfSet, visitedSet, pinnedSet);
     saveStrictCooldownUntil(0);
-    rerender({ query: "", sort: "az", verifyQuery: "", rateNotice: "", safetyMode, showDone: false, showTbd: false, showPnf: false, theme: activeTheme });
+    rerender({ query: "", sort: "latest", verifyQuery: "", rateNotice: "", safetyMode, showDone: false, showTbd: false, showPnf: false, theme: activeTheme });
   };
 }
 async function main() {
@@ -1278,7 +1328,7 @@ async function main() {
       },
       safetyMode,
       query: "",
-      sort: "az",
+      sort: "latest",
       verifyQuery: "",
       rateNotice: "",
       showDone: false,

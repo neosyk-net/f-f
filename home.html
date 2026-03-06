@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>f&f home</title>
+    <script>
+        (() => {
+            const saved = localStorage.getItem("ig_theme_v1");
+            const theme = saved === "dark" ? "dark" : "light";
+            document.documentElement.dataset.theme = theme;
+            window.__initialTheme = theme;
+        })();
+    </script>
+    <link rel="preload" as="image" href="./assets/f&f-logo.png">
+    <link rel="preload" as="image" href="./assets/f&f-logo-light.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./styles/styles.css">
+    <script defer src="./script/home.js"></script>
+</head>
+<body>
+    <div class="app-page">
+        <nav class="top-nav panel" aria-label="Primary">
+            <div class="top-nav-brand">
+                <button type="button" class="top-nav-home top-nav-profile" aria-label="Profile">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M20 21a8 8 0 0 0-16 0"></path>
+                        <circle cx="12" cy="8" r="4"></circle>
+                    </svg>
+                </button>
+            </div>
+            <div class="top-nav-center">
+                <img id="home-nav-logo" src="./assets/f&f-logo.png" alt="f&f logo" class="top-nav-logo" width="96" height="96" />
+                <script>
+                    (() => {
+                        const logo = document.getElementById("home-nav-logo");
+                        if (!logo) return;
+                        logo.src = window.__initialTheme === "light"
+                            ? "./assets/f&f-logo-light.png"
+                            : "./assets/f&f-logo.png";
+                    })();
+                </script>
+            </div>
+            <div class="top-nav-links">
+                <a href="./index.html" class="top-nav-link">open app</a>
+                <a href="./home.html" class="top-nav-home is-current" aria-label="Home" aria-current="page">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M3 10.5 12 3l9 7.5"></path>
+                        <path d="M5 9.5V21h14V9.5"></path>
+                        <path d="M9.5 21v-6h5v6"></path>
+                    </svg>
+                </a>
+                <button id="toggle-theme" class="mini-btn theme-btn top-nav-theme-btn" aria-label="Toggle theme"></button>
+            </div>
+        </nav>
+
+        <main class="panel landing-shell" aria-label="Home landing page">
+            <section class="hero-section" aria-labelledby="hero-title">
+                <div class="hero-ambient" aria-hidden="true">
+                    <img src="./assets/logo-arrows.png" alt="" class="hero-logo-arrows" />
+                    <div class="hero-stage-card hero-stage-card-back"></div>
+                    <div class="hero-stage-card hero-stage-card-front">
+                        <div class="hero-stage-bar"></div>
+                        <div class="hero-stage-icons">
+                            <span class="hero-stage-icon">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg>
+                            </span>
+                            <span class="hero-stage-icon">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M7 10 12 15 17 10"></path><path d="M12 15V3"></path></svg>
+                            </span>
+                            <span class="hero-stage-icon">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11h6"></path><path d="M9 15h4"></path><rect x="4" y="4" width="16" height="16" rx="3"></rect></svg>
+                            </span>
+                        </div>
+                        <div class="hero-stage-grid">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+                <h1 id="hero-title" class="hero-title">turn your instagram export into tools</h1>
+                <p class="hero-eyebrow">instagram export tools</p>
+                <p class="hero-copy">
+                    f&amp;f helps you upload your followers and following data, process it once, and open the tools you need.
+                </p>
+                <div class="hero-flow" aria-label="Product flow">
+                    <span class="hero-flow-item">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg>
+                        export
+                    </span>
+                    <span class="hero-flow-sep" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"></path></svg>
+                    </span>
+                    <span class="hero-flow-item">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M7 10 12 15 17 10"></path><path d="M12 15V3"></path></svg>
+                        upload
+                    </span>
+                    <span class="hero-flow-sep" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"></path></svg>
+                    </span>
+                    <span class="hero-flow-item">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11h6"></path><path d="M9 15h4"></path><rect x="4" y="4" width="16" height="16" rx="3"></rect></svg>
+                        choose tools
+                    </span>
+                </div>
+                <div class="hero-actions">
+                    <a href="#upload-section" class="hero-btn hero-btn-primary">upload your data</a>
+                    <a href="#tutorial-section" class="hero-btn hero-btn-secondary">see how it works</a>
+                </div>
+            </section>
+
+            <section id="tutorial-section" class="landing-placeholder-section" aria-label="Tutorial preview">
+                <div class="section-intro">
+                    <p class="section-kicker">desktop walkthrough</p>
+                    <h2 class="section-title">how to export your instagram data</h2>
+                    <p class="section-copy">
+                        this tutorial is built for the desktop version of instagram. follow the steps below, download your export, then come back here to upload your files.
+                    </p>
+                    <button type="button" class="tutorial-dev-toggle" data-tutorial-reset>show login overlay again</button>
+                </div>
+
+                <div class="tutorial-lock-shell is-locked" data-tutorial-shell>
+                    <div class="tutorial-lock-overlay" data-tutorial-overlay>
+                        <span class="tutorial-prestep-badge">before you start</span>
+                        <h3 class="tutorial-prestep-title">log into instagram on desktop first</h3>
+                        <p class="tutorial-prestep-copy">
+                            sign into the instagram account you want to export in this browser first, then unlock the walkthrough and continue step by step.
+                        </p>
+                        <div class="tutorial-lock-actions">
+                            <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" class="hero-btn hero-btn-secondary">go to instagram</a>
+                            <button type="button" class="hero-btn hero-btn-primary" data-tutorial-unlock>already logged in</button>
+                        </div>
+                    </div>
+
+                    <div class="tutorial-carousel" aria-label="Instagram export tutorial" data-tutorial-carousel>
+                        <div class="tutorial-carousel-media">
+                            <img
+                                src="./assets/tutorial/profile-page.png"
+                                alt="Instagram desktop profile page"
+                                class="tutorial-image"
+                            />
+                            <div class="tutorial-carousel-body tutorial-carousel-overlay">
+                                <div class="tutorial-carousel-topline">
+                                <span class="tutorial-step-number">01</span>
+                                <span class="tutorial-step-count">1 / 1</span>
+                                </div>
+                                <h3 class="tutorial-step-title">open the menu from your profile page</h3>
+                                <p class="tutorial-step-copy">
+                                    start on your instagram profile page, then click the three-line menu button in the lower left sidebar to open the options menu.
+                                </p>
+
+                                <div class="tutorial-carousel-controls">
+                                    <button type="button" class="tutorial-nav-btn" disabled>previous</button>
+                                    <button type="button" class="tutorial-nav-btn" disabled>next</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="upload-section" class="landing-placeholder-section" aria-label="Upload preview">
+                <p class="landing-placeholder-text">upload flow coming next</p>
+            </section>
+        </main>
+    </div>
+    <script>
+        (() => {
+            const button = document.getElementById("toggle-theme");
+            if (!button) return;
+            const theme = window.__initialTheme === "dark" ? "dark" : "light";
+            button.innerHTML =
+                theme === "dark"
+                    ? `<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>`
+                    : `<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9"></path></svg>`;
+        })();
+    </script>
+</body>
+</html>

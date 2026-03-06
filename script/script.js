@@ -232,6 +232,16 @@ function saveTheme(theme) {
   localStorage.setItem(STORAGE_KEY_THEME, theme);
 }
 
+function getNavLogoSrc(theme) {
+  return theme === "light" ? "./assets/f&f-logo-light.png" : "./assets/f&f-logo.png";
+}
+
+function setNavLogo(theme) {
+  const logo = document.querySelector(".top-nav-logo");
+  if (!(logo instanceof HTMLImageElement)) return;
+  logo.src = getNavLogoSrc(theme);
+}
+
 function setThemeToggleButton(theme) {
   const button = document.getElementById("toggle-theme");
   if (!(button instanceof HTMLButtonElement)) return;
@@ -575,17 +585,38 @@ function renderResults({
 
   root.innerHTML = `
     <div class="app-page">
-      <section class="app-shell panel">
+      <nav class="top-nav panel" aria-label="Primary">
+        <div class="top-nav-brand">
+          <button type="button" class="top-nav-home top-nav-profile" aria-label="Profile">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 21a8 8 0 0 0-16 0"></path>
+              <circle cx="12" cy="8" r="4"></circle>
+            </svg>
+          </button>
+        </div>
+        <div class="top-nav-center">
+          <img src="${getNavLogoSrc(activeTheme)}" alt="f&f logo" class="top-nav-logo" width="96" height="96" />
+        </div>
+        <div class="top-nav-links">
+          <a href="./home.html" class="top-nav-home" aria-label="Home">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3 10.5 12 3l9 7.5"></path>
+              <path d="M5 9.5V21h14V9.5"></path>
+              <path d="M9.5 21v-6h5v6"></path>
+            </svg>
+          </a>
+          <button id="toggle-theme" class="mini-btn theme-btn top-nav-theme-btn" aria-label="${themeLabel}" title="${themeLabel}">
+            <span class="theme-fallback">${activeTheme === "dark" ? "sun" : "moon"}</span>
+          </button>
+        </div>
+      </nav>
+
+      <section id="safety-panel" class="app-shell panel">
         <div class="title-row">
           <div class="title-action-left">
             <button id="toggle-safety" class="mini-btn theme-btn" aria-label="Safety mode"></button>
           </div>
           <h1>Not Following Back Sweep</h1>
-          <div class="title-action-right">
-            <button id="toggle-theme" class="mini-btn theme-btn" aria-label="${themeLabel}" title="${themeLabel}">
-              <span class="theme-fallback">${activeTheme === "dark" ? "sun" : "moon"}</span>
-            </button>
-          </div>
         </div>
 
         <div class="limit-box ${safetyMode === "strict" && strictLocked ? "limit-box-warning" : ""}">
@@ -621,7 +652,7 @@ function renderResults({
         </div>
       </section>
 
-      <section class="panel search-panel">
+      <section id="search-panel" class="panel search-panel">
         ${dataLine ? `<p class="meta-line search-panel-headline">${escapeHtml(dataLine)}</p>` : ""}
         <div class="stats-row">
           <div><b>Total:</b> ${all.length}</div>
@@ -666,7 +697,7 @@ function renderResults({
       </section>
 
       <div class="lists-grid">
-        <section class="panel list-panel left-column">
+        <section id="pending-panel" class="panel list-panel left-column">
           <h2 class="pending-heading">
             <span class="pending-heading-main">
               <span>Pending</span>
@@ -751,6 +782,7 @@ function renderResults({
     </div>
   `;
   setThemeToggleButton(activeTheme);
+  setNavLogo(activeTheme);
   setSafetyToggleButton(safetyMode);
   startSafetyTicker(safetyMode);
 
@@ -1127,6 +1159,7 @@ function renderResults({
       applyTheme(activeTheme);
       saveTheme(activeTheme);
       setThemeToggleButton(activeTheme);
+      setNavLogo(activeTheme);
       return;
     }
     if (button.id === "toggle-safety") {

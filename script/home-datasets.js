@@ -9,6 +9,7 @@ let activeDatasetId = loadActiveDatasetId();
 let stagedUpload = null;
 let activeTheme = loadTheme();
 let showDatasetNameValidation = false;
+let activeMainView = "landing";
 
 function loadTheme() {
   const saved = localStorage.getItem(STORAGE_KEY_THEME);
@@ -114,6 +115,11 @@ function formatDatasetDate(value) {
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 }
 
+function formatCount(value) {
+  const number = Number(value || 0);
+  return Number.isFinite(number) ? number.toLocaleString() : "0";
+}
+
 function makeDatasetId() {
   return `dataset_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
@@ -129,6 +135,15 @@ function getUi() {
     datasetList: document.querySelector("[data-dataset-list]"),
     datasetCount: document.querySelector("[data-dataset-count]"),
     datasetLimitCopy: document.querySelector("[data-dataset-limit-copy]"),
+    landingView: document.querySelector("[data-landing-view]"),
+    workspaceView: document.querySelector("[data-workspace-view]"),
+    toolsPanel: document.querySelector("[data-tools-panel]"),
+    workspaceDatasetName: document.querySelector("[data-workspace-dataset-name]"),
+    workspaceDatasetDate: document.querySelector("[data-workspace-dataset-date]"),
+    workspaceFollowers: document.querySelector("[data-workspace-followers]"),
+    workspaceFollowing: document.querySelector("[data-workspace-following]"),
+    workspaceCategories: document.querySelector("[data-workspace-categories]"),
+    workspaceSource: document.querySelector("[data-workspace-source]"),
     modal: document.querySelector("[data-create-modal]"),
     modalIndicators: document.querySelectorAll("[data-modal-step-indicator]"),
     modalStages: document.querySelectorAll("[data-modal-stage]"),
@@ -245,20 +260,45 @@ function renderDatasetList() {
 }
 
 function renderActiveDataset() {
+  const ui = getUi();
   const active = getActiveDataset();
   if (active) {
     saveActiveDatasetId(active.id);
     syncPrototypeUploadCache();
-    return;
+  } else {
+    syncPrototypeUploadCache();
   }
 
-  syncPrototypeUploadCache();
+  const showWorkspace = Boolean(active) && activeMainView === "workspace";
+  if (ui.landingView instanceof HTMLElement) ui.landingView.hidden = showWorkspace;
+  if (ui.workspaceView instanceof HTMLElement) ui.workspaceView.hidden = !showWorkspace;
+  if (ui.toolsPanel instanceof HTMLElement) ui.toolsPanel.hidden = !showWorkspace;
+
+  if (!active) return;
+
+  if (ui.workspaceDatasetName) ui.workspaceDatasetName.textContent = active.name || "active dataset";
+  if (ui.workspaceDatasetDate) ui.workspaceDatasetDate.textContent = formatDatasetDate(active.createdAt);
+  if (ui.workspaceFollowers) ui.workspaceFollowers.textContent = formatCount(active.meta?.followerEntryCount);
+  if (ui.workspaceFollowing) ui.workspaceFollowing.textContent = formatCount(active.meta?.followingEntryCount);
+  if (ui.workspaceCategories) ui.workspaceCategories.textContent = formatCount(active.meta?.categoryCounts?.length);
+  if (ui.workspaceSource) ui.workspaceSource.textContent = active.meta?.sourceLabel || "not detected";
 }
 
 function renderAll() {
   updateGuestLimitUi();
   renderDatasetList();
   renderActiveDataset();
+}
+
+function showHomePanel() {
+  activeMainView = "landing";
+  renderAll();
+}
+
+function showWorkspacePanel() {
+  if (!getActiveDataset()) return;
+  activeMainView = "workspace";
+  renderAll();
 }
 
 function resetUploadUi() {
@@ -593,6 +633,7 @@ async function processSelectedFiles(fileList) {
 
 function selectDataset(id) {
   saveActiveDatasetId(id);
+  activeMainView = "workspace";
   renderAll();
 }
 
@@ -627,6 +668,7 @@ function createDatasetFromStage() {
     syncPrototypeUploadCache();
     return;
   }
+  activeMainView = "workspace";
   selectDataset(dataset.id);
   closeCreateModal();
 }
@@ -758,6 +800,12 @@ function wireDatasetList() {
   });
 }
 
+function wireHomePanelToggle() {
+  document.querySelectorAll("[data-show-home]").forEach((button) => {
+    button.addEventListener("click", showHomePanel);
+  });
+}
+
 function syncActiveDataset() {
   if (!datasets.length) {
     saveActiveDatasetId("");
@@ -776,9 +824,11 @@ setNavLogo(activeTheme);
 setThemeToggleButton(activeTheme);
 setTutorialUnlocked(localStorage.getItem(STORAGE_KEY_TUTORIAL_UNLOCKED) === "true");
 syncActiveDataset();
+activeMainView = getActiveDataset() ? "workspace" : "landing";
 wireUploadFlow();
 wireModal();
 wireDatasetList();
+wireHomePanelToggle();
 renderAll();
 
 document.getElementById("toggle-theme")?.addEventListener("click", () => {

@@ -45,9 +45,9 @@
                 </button>
             </div>
             <div class="top-nav-center">
-                <span class="top-nav-logo-link is-current" aria-label="Home" aria-current="page">
+                <button type="button" class="top-nav-logo-link is-current" data-show-home aria-label="Show home panel">
                     <img id="home-nav-logo" src="./assets/f&f-logo.png" alt="f&f logo" class="top-nav-logo" width="96" height="96" />
-                </span>
+                </button>
                 <script>
                     (() => {
                         const logo = document.getElementById("home-nav-logo");
@@ -67,7 +67,7 @@
         <div class="dataset-workspace">
             <aside class="dataset-sidebar panel" aria-label="Datasets">
                     <div class="dataset-sidebar-head">
-                        <p class="section-kicker">guest workspace</p>
+                        <p class="section-kicker">guest mode</p>
                         <h2 class="dataset-sidebar-title">datasets</h2>
                     </div>
 
@@ -89,7 +89,8 @@
                     </div>
             </aside>
 
-            <main class="panel landing-shell dataset-main" aria-label="Home landing page">
+            <div class="dataset-main-column">
+            <main class="panel landing-shell dataset-main" data-landing-view aria-label="Home landing page">
                     <section class="hero-section" aria-labelledby="hero-title">
                         <div class="hero-ambient" aria-hidden="true">
                             <img src="./assets/logo-arrows.png" alt="" class="hero-logo-arrows" />
@@ -243,11 +244,101 @@
                     </div>
                     </section>
             </main>
+            <section class="panel dataset-overview-shell" data-workspace-view hidden aria-label="Dataset workspace overview">
+                <div class="dataset-overview-head">
+                    <div>
+                        <p class="section-kicker">dataset overview</p>
+                        <h2 class="dataset-overview-title" data-workspace-dataset-name>active dataset</h2>
+                    </div>
+                    <div class="dataset-overview-meta">
+                        <span class="dataset-meta-label">created</span>
+                        <span class="dataset-meta-value" data-workspace-dataset-date>not set</span>
+                    </div>
+                </div>
+
+                <div class="dataset-overview-intro">
+                    <p class="dataset-overview-copy">
+                        use the workspace panel to open available tools.
+                    </p>
+                </div>
+
+                <div class="dataset-overview-grid">
+                    <div class="dataset-overview-card">
+                        <span class="dataset-meta-label">followers</span>
+                        <strong class="dataset-overview-value" data-workspace-followers>0</strong>
+                    </div>
+                    <div class="dataset-overview-card">
+                        <span class="dataset-meta-label">following</span>
+                        <strong class="dataset-overview-value" data-workspace-following>0</strong>
+                    </div>
+                    <div class="dataset-overview-card">
+                        <span class="dataset-meta-label">categories detected</span>
+                        <strong class="dataset-overview-value" data-workspace-categories>0</strong>
+                    </div>
+                    <div class="dataset-overview-card">
+                        <span class="dataset-meta-label">import source</span>
+                        <strong class="dataset-overview-value" data-workspace-source>not detected</strong>
+                    </div>
+                </div>
+            </section>
+            </div>
+
+            <aside class="panel tools-sidebar" data-tools-panel hidden aria-label="Dataset tools">
+                <div class="tools-sidebar-head">
+                    <p class="section-kicker">workspace</p>
+                    <h2 class="tools-sidebar-title">available tools</h2>
+                </div>
+
+                <div class="tools-sidebar-list workspace-tool-list">
+                    <a href="./index.html" class="workspace-tool-pill is-live" aria-label="Open Not Following Back">
+                        <span class="workspace-tool-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 3v12"></path>
+                                <path d="m7 10 5 5 5-5"></path>
+                                <path d="M5 21h14"></path>
+                            </svg>
+                        </span>
+                        <span class="workspace-tool-copy">
+                            <strong>not following back</strong>
+                        </span>
+                        <span class="workspace-tool-status is-live">live</span>
+                    </a>
+
+                    <div class="workspace-tool-pill" aria-label="Ghost Followers coming soon">
+                        <span class="workspace-tool-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M4 20h16"></path>
+                                <path d="M7 20v-9"></path>
+                                <path d="M12 20V4"></path>
+                                <path d="M17 20v-6"></path>
+                            </svg>
+                        </span>
+                        <span class="workspace-tool-copy">
+                            <strong>ghost followers</strong>
+                        </span>
+                        <span class="workspace-tool-status">soon</span>
+                    </div>
+
+                    <div class="workspace-tool-pill" aria-label="Activity Insights coming soon">
+                        <span class="workspace-tool-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M6 18V8"></path>
+                                <path d="M12 18V4"></path>
+                                <path d="M18 18v-6"></path>
+                            </svg>
+                        </span>
+                        <span class="workspace-tool-copy">
+                            <strong>activity insights</strong>
+                        </span>
+                        <span class="workspace-tool-status">soon</span>
+                    </div>
+                </div>
+            </aside>
         </div>
         <footer class="site-footer panel" aria-label="Site footer">
-            <div class="site-footer-brand is-current" aria-label="Home" aria-current="page">
+            <button type="button" class="site-footer-brand is-current" data-show-home aria-label="Show home panel">
                 <img id="home-footer-logo" src="./assets/f&f-logo.png" alt="f&f logo" class="site-footer-logo" width="72" height="72" />
-            </div>
+            </button>
             <p class="site-footer-copy">f&amp;f &copy; 2026</p>
             <div class="site-footer-spacer" aria-hidden="true"></div>
         </footer>

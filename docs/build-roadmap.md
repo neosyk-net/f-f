@@ -64,6 +64,7 @@ Recommended scope:
 - improve dataset creation copy and flow
 - define the dataset workspace layout
 - align current `f&f` tool language with future tool-system language
+- add clear recommended export settings to the landing/tutorial flow
 
 Avoid in this phase:
 
@@ -77,6 +78,13 @@ Success criteria:
 - product flow feels coherent
 - dataset-first story is visible in the UI
 - Tool 1 is clearly positioned as the first tool, not the whole product
+
+Export settings guidance for this phase:
+
+- `JSON` is required for the current product
+- `HTML` support is a possible future compatibility feature
+- `medium` media quality is the recommended default
+- date range should be chosen based on what the user wants to analyze
 
 ## Phase 2: Next.js Migration
 

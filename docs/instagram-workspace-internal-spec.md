@@ -65,6 +65,22 @@ Key principle:
 
 `Upload once. Use many times.`
 
+## Export Requirements
+
+Current rule:
+
+- `JSON` export format is required for the current product
+
+Current recommendation:
+
+- use `medium` media quality by default
+- choose the date range based on what you want to analyze
+
+Future compatibility direction:
+
+- `HTML` export support may be added later if it meaningfully reduces user friction
+- do not broaden format support until the JSON-first dataset model is stable
+
 ## Main Pages
 
 ### Homepage

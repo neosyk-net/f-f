@@ -10,6 +10,8 @@ let stagedUpload = null;
 let activeTheme = loadTheme();
 let showDatasetNameValidation = false;
 let activeMainView = "landing";
+let openDatasetMenuId = "";
+let activeWorkspaceDetail = "";
 
 function loadTheme() {
   const saved = localStorage.getItem(STORAGE_KEY_THEME);
@@ -103,6 +105,9 @@ function syncPrototypeUploadCache() {
       uploadedAt: active.createdAtMs || Date.now(),
       followersData: active.followersData,
       followingData: active.followingData,
+      profile: active.profile || null,
+      scope: active.scope || {},
+      metrics: active.metrics || {},
       meta: active.meta || {}
     })
   );
@@ -120,6 +125,23 @@ function formatCount(value) {
   return Number.isFinite(number) ? number.toLocaleString() : "0";
 }
 
+function formatOptionalCount(value, fallback = "Not available") {
+  const number = Number(value);
+  return Number.isFinite(number) ? number.toLocaleString() : fallback;
+}
+
+function hasMetricValue(value) {
+  return Number.isFinite(Number(value));
+}
+
+function getMetricTrendTone(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return "";
+  if (number > 0) return "positive";
+  if (number < 0) return "negative";
+  return "neutral";
+}
+
 function makeDatasetId() {
   return `dataset_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
@@ -130,6 +152,296 @@ function extractEntries(data, key) {
   return [];
 }
 
+function escapeHtml(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function normalizeUsername(value) {
+  return String(value || "").trim().replace(/^@/, "").toLowerCase();
+}
+
+function buildInstagramProfileUrl(username) {
+  const normalized = normalizeUsername(username);
+  return normalized ? `https://www.instagram.com/${normalized}/` : "";
+}
+
+function getFirstArrayItem(data, key) {
+  const entries = extractEntries(data, key);
+  return entries[0] || null;
+}
+
+function getStringMapValue(entry, key) {
+  if (!entry || typeof entry !== "object") return "";
+  return String(entry?.string_map_data?.[key]?.value || "").trim();
+}
+
+function getMediaMapEntry(entry, key) {
+  if (!entry || typeof entry !== "object") return null;
+  return entry?.media_map_data?.[key] || null;
+}
+
+function looksCorruptedProfileText(value) {
+  const text = String(value || "").trim();
+  if (!text) return false;
+  return /Ã|â|ð|�/.test(text);
+}
+
+function repairCorruptedUtf8Text(value) {
+  const text = String(value || "").trim();
+  if (!text) return "";
+
+  try {
+    const bytes = Uint8Array.from([...text].map((char) => char.charCodeAt(0) & 0xff));
+    return new TextDecoder("utf-8", { fatal: false }).decode(bytes).trim();
+  } catch {
+    return text;
+  }
+}
+
+function normalizeDisplayNameText(value) {
+  const original = String(value || "").trim();
+  if (!original) return "";
+
+  const repaired = looksCorruptedProfileText(original) ? repairCorruptedUtf8Text(original) : original;
+  const normalized = repaired.normalize("NFKD");
+  const withoutMarks = normalized.replace(/\p{M}+/gu, "");
+  const cleaned = withoutMarks
+    .replace(/[^\p{L}\p{N} .'-]+/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return cleaned;
+}
+
+function getPreferredDisplayName(profile, datasetName) {
+  const displayName = normalizeDisplayNameText(profile?.displayName || "");
+  if (displayName) return displayName;
+
+  const username = String(profile?.username || "").trim();
+  if (username) return `@${username}`;
+
+  const fallbackName = String(datasetName || "").trim();
+  if (fallbackName) return fallbackName;
+
+  return "display name not found";
+}
+
+function extractUsernameFromHref(href) {
+  if (!href) return "";
+
+  try {
+    const url = new URL(href);
+    const segments = url.pathname.split("/").filter(Boolean);
+    if (!segments.length) return "";
+    if (segments[0] === "_u" && segments[1]) return normalizeUsername(segments[1]);
+    return normalizeUsername(segments[0]);
+  } catch {
+    const match = String(href).match(/instagram\.com\/(?:_u\/)?([^/?#]+)/i);
+    return normalizeUsername(match?.[1] || "");
+  }
+}
+
+function extractRelationshipUsername(entry) {
+  if (!entry || typeof entry !== "object") return "";
+  const title = normalizeUsername(entry.title);
+  if (title) return title;
+  const first = entry?.string_list_data?.[0] || {};
+  const value = normalizeUsername(first.value);
+  if (value) return value;
+  return extractUsernameFromHref(first.href);
+}
+
+function extractRelationshipTimestamp(entry) {
+  const timestamp = Number(entry?.string_list_data?.[0]?.timestamp || 0);
+  return Number.isFinite(timestamp) ? timestamp : 0;
+}
+
+function createRelationshipRecords(entries, source) {
+  const records = [];
+  const seen = new Set();
+
+  for (const entry of entries) {
+    const username = extractRelationshipUsername(entry);
+    if (!username || seen.has(username)) continue;
+    seen.add(username);
+    records.push({
+      username,
+      href: String(entry?.string_list_data?.[0]?.href || ""),
+      timestamp: extractRelationshipTimestamp(entry),
+      source
+    });
+  }
+
+  return records;
+}
+
+function buildRelationshipMetrics(followerEntries, followingEntries) {
+  const followers = createRelationshipRecords(followerEntries, "followers");
+  const following = createRelationshipRecords(followingEntries, "following");
+  const followerSet = new Set(followers.map((entry) => entry.username));
+  const followingSet = new Set(following.map((entry) => entry.username));
+
+  let mutualCount = 0;
+  let notFollowingBackCount = 0;
+
+  for (const username of followingSet) {
+    if (followerSet.has(username)) {
+      mutualCount += 1;
+    } else {
+      notFollowingBackCount += 1;
+    }
+  }
+
+  return {
+    followerCount: followers.length,
+    followingCount: following.length,
+    mutualCount,
+    notFollowingBackCount
+  };
+}
+
+function extractProfileFromPersonalInfo(data) {
+  const profileEntry = getFirstArrayItem(data, "profile_user");
+  if (!profileEntry) return null;
+
+  const photo = getMediaMapEntry(profileEntry, "Profile Photo");
+  const username = normalizeUsername(getStringMapValue(profileEntry, "Username"));
+
+  return {
+    username,
+    displayName: getStringMapValue(profileEntry, "Name"),
+    bio: getStringMapValue(profileEntry, "Bio"),
+    website: getStringMapValue(profileEntry, "Website"),
+    isPrivate: getStringMapValue(profileEntry, "Private Account").toLowerCase() === "true",
+    profilePhotoPath: String(photo?.uri || "").trim(),
+    profilePhotoCreatedAt: Number(photo?.creation_timestamp || 0) || 0
+  };
+}
+
+function extractInsightDateRange(data) {
+  if (!data || typeof data !== "object") return "";
+
+  for (const value of Object.values(data)) {
+    if (!Array.isArray(value)) continue;
+    for (const entry of value) {
+      const label = getStringMapValue(entry, "Date Range");
+      if (label) return label;
+    }
+  }
+
+  return "";
+}
+
+function parseInsightCount(value) {
+  const digits = String(value || "").replace(/[^\d-]/g, "");
+  if (!digits) return null;
+  const number = Number(digits);
+  return Number.isFinite(number) ? number : null;
+}
+
+function extractAudienceInsights(data) {
+  const entry = getFirstArrayItem(data, "organic_insights_audience");
+  if (!entry) return null;
+
+  const followerTotal = parseInsightCount(getStringMapValue(entry, "Followers"));
+  const followsInRange = parseInsightCount(getStringMapValue(entry, "Follows"));
+  const unfollowsInRange = parseInsightCount(getStringMapValue(entry, "Unfollows"));
+  const netFollowersInRange = parseInsightCount(getStringMapValue(entry, "Overall followers"));
+  const dateRangeLabel = getStringMapValue(entry, "Date Range");
+
+  return {
+    followerTotal,
+    followsInRange,
+    unfollowsInRange,
+    netFollowersInRange,
+    dateRangeLabel
+  };
+}
+
+function extractReachInsights(data) {
+  const entry = getFirstArrayItem(data, "organic_insights_reach");
+  if (!entry) return null;
+
+  return {
+    accountsReached: parseInsightCount(getStringMapValue(entry, "Accounts Reached")),
+    impressions: parseInsightCount(getStringMapValue(entry, "Impressions")),
+    profileVisits: parseInsightCount(getStringMapValue(entry, "Profile visits")),
+    externalLinkTaps: parseInsightCount(getStringMapValue(entry, "External link taps")),
+    dateRangeLabel: getStringMapValue(entry, "Date Range")
+  };
+}
+
+function extractInteractionInsights(data) {
+  const entry = getFirstArrayItem(data, "organic_insights_interactions");
+  if (!entry) return null;
+
+  return {
+    contentInteractions: parseInsightCount(getStringMapValue(entry, "Content Interactions")),
+    accountsEngaged: parseInsightCount(getStringMapValue(entry, "Accounts engaged")),
+    postInteractions: parseInsightCount(getStringMapValue(entry, "Post Interactions")),
+    storyInteractions: parseInsightCount(getStringMapValue(entry, "Story Interactions")),
+    storyReplies: parseInsightCount(getStringMapValue(entry, "Story Replies")),
+    dateRangeLabel: getStringMapValue(entry, "Date Range")
+  };
+}
+
+function pathMatchesRelative(file, relativePath) {
+  if (!relativePath) return false;
+  const normalizedFilePath = normalizePathForMatch(file);
+  const normalizedRelativePath = String(relativePath).replace(/\\/g, "/").toLowerCase();
+  return normalizedFilePath.endsWith(normalizedRelativePath);
+}
+
+function mimeTypeFromPath(path) {
+  const lower = String(path || "").toLowerCase();
+  if (lower.endsWith(".png")) return "image/png";
+  if (lower.endsWith(".webp")) return "image/webp";
+  if (lower.endsWith(".gif")) return "image/gif";
+  return "image/jpeg";
+}
+
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : "");
+    reader.onerror = () => reject(new Error("Could not read image file."));
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function resolveProfilePhotoDataUrl(profilePhotoPath, expandedFiles, sourceFiles) {
+  if (!profilePhotoPath) return "";
+
+  const directFile = expandedFiles.find((file) => pathMatchesRelative(file, profilePhotoPath));
+  if (directFile) {
+    return blobToDataUrl(directFile);
+  }
+
+  const zipFile = sourceFiles.find((file) => isZipFile(file));
+  if (!zipFile) return "";
+
+  const fflate = window.fflate;
+  if (!fflate?.unzipSync) return "";
+
+  try {
+    const archive = fflate.unzipSync(new Uint8Array(await zipFile.arrayBuffer()));
+    const entry = Object.entries(archive).find(([path]) => {
+      const normalizedPath = String(path).replace(/\\/g, "/").toLowerCase();
+      return normalizedPath === profilePhotoPath.toLowerCase();
+    });
+    if (!entry) return "";
+    const [, bytes] = entry;
+    return blobToDataUrl(new Blob([bytes], { type: mimeTypeFromPath(profilePhotoPath) }));
+  } catch {
+    return "";
+  }
+}
+
 function getUi() {
   return {
     datasetList: document.querySelector("[data-dataset-list]"),
@@ -138,12 +450,32 @@ function getUi() {
     landingView: document.querySelector("[data-landing-view]"),
     workspaceView: document.querySelector("[data-workspace-view]"),
     toolsPanel: document.querySelector("[data-tools-panel]"),
+    workspaceHead: document.querySelector("[data-workspace-head]"),
     workspaceDatasetName: document.querySelector("[data-workspace-dataset-name]"),
     workspaceDatasetDate: document.querySelector("[data-workspace-dataset-date]"),
+    workspaceProfilePhoto: document.querySelector("[data-workspace-profile-photo]"),
+    workspaceProfileLink: document.querySelector("[data-workspace-profile-link]"),
+    workspaceUsername: document.querySelector("[data-workspace-username]"),
+    workspaceDisplayName: document.querySelector("[data-workspace-display-name]"),
+    workspaceRange: document.querySelector("[data-workspace-range]"),
     workspaceFollowers: document.querySelector("[data-workspace-followers]"),
-    workspaceFollowing: document.querySelector("[data-workspace-following]"),
+    workspaceAccountsReached: document.querySelector("[data-workspace-accounts-reached]"),
+    workspaceProfileVisits: document.querySelector("[data-workspace-profile-visits]"),
+    workspaceImpressions: document.querySelector("[data-workspace-impressions]"),
+    workspaceExternalLinkTaps: document.querySelector("[data-workspace-external-link-taps]"),
+    workspaceContentInteractions: document.querySelector("[data-workspace-content-interactions]"),
+    workspaceAccountsEngaged: document.querySelector("[data-workspace-accounts-engaged]"),
     workspaceCategories: document.querySelector("[data-workspace-categories]"),
     workspaceSource: document.querySelector("[data-workspace-source]"),
+    workspaceOverviewBody: document.querySelector("[data-workspace-overview-body]"),
+    workspaceDetailView: document.querySelector("[data-workspace-detail-view]"),
+    workspaceDetailKicker: document.querySelector("[data-workspace-detail-kicker]"),
+    workspaceDetailTitle: document.querySelector("[data-workspace-detail-title]"),
+    workspaceDetailCopy: document.querySelector("[data-workspace-detail-copy]"),
+    workspaceDetailPrimaryLabel: document.querySelector("[data-workspace-detail-primary-label]"),
+    workspaceDetailPrimaryValue: document.querySelector("[data-workspace-detail-primary-value]"),
+    workspaceDetailGrid: document.querySelector("[data-workspace-detail-grid]"),
+    workspaceDetailNote: document.querySelector("[data-workspace-detail-note]"),
     modal: document.querySelector("[data-create-modal]"),
     modalIndicators: document.querySelectorAll("[data-modal-step-indicator]"),
     modalStages: document.querySelectorAll("[data-modal-stage]"),
@@ -248,15 +580,82 @@ function renderDatasetList() {
   }
 
   for (const dataset of datasets) {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = `dataset-card${dataset.id === activeDatasetId ? " is-active" : ""}`;
-    button.dataset.datasetId = dataset.id;
-    button.innerHTML = `
-      <h3 class="dataset-card-title">${dataset.name}</h3>
+    const card = document.createElement("div");
+    const isMenuOpen = openDatasetMenuId === dataset.id;
+    card.className = `dataset-card${dataset.id === activeDatasetId ? " is-active" : ""}${isMenuOpen ? " is-menu-open" : ""}`;
+    card.innerHTML = `
+      <button type="button" class="dataset-card-select" data-dataset-select="${dataset.id}" aria-label="Open dataset ${escapeHtml(dataset.name)}">
+        <h3 class="dataset-card-title">${escapeHtml(dataset.name)}</h3>
+      </button>
+      <div class="dataset-card-actions">
+        <button
+          type="button"
+          class="dataset-card-menu-toggle"
+          data-dataset-menu-toggle="${dataset.id}"
+          data-tip="menu"
+          aria-label="Open dataset actions for ${escapeHtml(dataset.name)}"
+          aria-expanded="${isMenuOpen ? "true" : "false"}"
+        >
+          <span class="dataset-card-menu-letter">M</span>
+        </button>
+        <div class="dataset-card-menu"${isMenuOpen ? "" : " hidden"}>
+          <button type="button" class="dataset-card-menu-btn" data-dataset-rename="${dataset.id}" data-tip="edit" aria-label="Rename dataset ${escapeHtml(dataset.name)}">
+            <span class="dataset-card-menu-letter">E</span>
+          </button>
+          <button type="button" class="dataset-card-menu-btn is-danger" data-dataset-delete="${dataset.id}" data-tip="trash" aria-label="Delete dataset ${escapeHtml(dataset.name)}">
+            <span class="dataset-card-menu-letter">T</span>
+          </button>
+        </div>
+      </div>
     `;
-    datasetList.appendChild(button);
+    datasetList.appendChild(card);
   }
+}
+
+function toggleDatasetMenu(id) {
+  openDatasetMenuId = openDatasetMenuId === id ? "" : id;
+  renderDatasetList();
+}
+
+function renameDataset(id) {
+  const dataset = datasets.find((entry) => entry.id === id);
+  if (!dataset) return;
+
+  const nextName = window.prompt("Rename dataset", dataset.name || "");
+  if (nextName === null) return;
+
+  const trimmed = nextName.trim();
+  if (!trimmed) return;
+
+  dataset.name = trimmed;
+  saveDatasets();
+  openDatasetMenuId = "";
+  renderAll();
+}
+
+function deleteDataset(id) {
+  const dataset = datasets.find((entry) => entry.id === id);
+  if (!dataset) return;
+
+  const confirmed = window.confirm(`Delete "${dataset.name}"? This removes it from local guest storage.`);
+  if (!confirmed) return;
+
+  datasets = datasets.filter((entry) => entry.id !== id);
+  openDatasetMenuId = "";
+
+  if (!datasets.length) {
+    saveActiveDatasetId("");
+    activeMainView = "landing";
+    activeWorkspaceDetail = "";
+  } else if (activeDatasetId === id) {
+    saveActiveDatasetId(datasets[0].id);
+    activeMainView = "workspace";
+    activeWorkspaceDetail = "";
+  }
+
+  saveDatasets();
+  syncActiveDataset();
+  renderAll();
 }
 
 function renderActiveDataset() {
@@ -278,10 +677,48 @@ function renderActiveDataset() {
 
   if (ui.workspaceDatasetName) ui.workspaceDatasetName.textContent = active.name || "active dataset";
   if (ui.workspaceDatasetDate) ui.workspaceDatasetDate.textContent = formatDatasetDate(active.createdAt);
-  if (ui.workspaceFollowers) ui.workspaceFollowers.textContent = formatCount(active.meta?.followerEntryCount);
-  if (ui.workspaceFollowing) ui.workspaceFollowing.textContent = formatCount(active.meta?.followingEntryCount);
+  if (ui.workspaceProfilePhoto instanceof HTMLImageElement) {
+    ui.workspaceProfilePhoto.src = active.profile?.profilePhotoDataUrl || "./assets/favicon.png";
+    ui.workspaceProfilePhoto.alt = active.profile?.username
+      ? `Profile photo for @${active.profile.username}`
+      : "Dataset profile photo";
+  }
+  if (ui.workspaceProfileLink instanceof HTMLAnchorElement) {
+    const profileUrl = buildInstagramProfileUrl(active.profile?.username);
+    ui.workspaceProfileLink.hidden = !profileUrl;
+    ui.workspaceProfileLink.href = profileUrl || "https://www.instagram.com/";
+    ui.workspaceProfileLink.setAttribute(
+      "aria-label",
+      profileUrl ? `Open @${active.profile?.username} on Instagram` : "Open Instagram profile"
+    );
+    ui.workspaceProfileLink.setAttribute(
+      "title",
+      profileUrl ? `Open @${active.profile?.username}` : "Open Instagram profile"
+    );
+  }
+  if (ui.workspaceUsername) ui.workspaceUsername.textContent = active.profile?.username ? `@${active.profile.username}` : "@instagram";
+  if (ui.workspaceDisplayName) ui.workspaceDisplayName.textContent = getPreferredDisplayName(active.profile, active.name);
+  if (ui.workspaceRange) {
+    ui.workspaceRange.textContent = active.scope?.insightDateRangeLabel
+      ? `detected insight range: ${active.scope.insightDateRangeLabel}`
+      : "insight range not detected";
+  }
+  if (ui.workspaceFollowers) {
+    ui.workspaceFollowers.textContent = formatCount(
+      active.metrics?.followerTotalFromInsights
+        ?? active.metrics?.followerCount
+        ?? active.meta?.followerEntryCount
+    );
+  }
+  if (ui.workspaceAccountsReached) ui.workspaceAccountsReached.textContent = formatCount(active.metrics?.accountsReached);
+  if (ui.workspaceProfileVisits) ui.workspaceProfileVisits.textContent = formatCount(active.metrics?.profileVisits);
+  if (ui.workspaceImpressions) ui.workspaceImpressions.textContent = formatCount(active.metrics?.impressions);
+  if (ui.workspaceExternalLinkTaps) ui.workspaceExternalLinkTaps.textContent = formatCount(active.metrics?.externalLinkTaps);
+  if (ui.workspaceContentInteractions) ui.workspaceContentInteractions.textContent = formatCount(active.metrics?.contentInteractions);
+  if (ui.workspaceAccountsEngaged) ui.workspaceAccountsEngaged.textContent = formatCount(active.metrics?.accountsEngaged);
   if (ui.workspaceCategories) ui.workspaceCategories.textContent = formatCount(active.meta?.categoryCounts?.length);
   if (ui.workspaceSource) ui.workspaceSource.textContent = active.meta?.sourceLabel || "not detected";
+  renderWorkspaceDetail(active, ui);
 }
 
 function renderAll() {
@@ -292,6 +729,7 @@ function renderAll() {
 
 function showHomePanel() {
   activeMainView = "landing";
+  activeWorkspaceDetail = "";
   renderAll();
 }
 
@@ -517,6 +955,30 @@ function buildUploadPayload(followerMatches, followingMatches, summaryMeta) {
   return {
     followersData,
     followingData,
+    profile: summaryMeta.profile,
+    scope: {
+      insightDateRangeLabel: summaryMeta.insightDateRangeLabel || ""
+    },
+    metrics: {
+      ...buildRelationshipMetrics(
+        followersData.relationships_followers,
+        followingData.relationships_following
+      ),
+      followerTotalFromInsights: summaryMeta.audienceInsights?.followerTotal ?? null,
+      accountsReached: summaryMeta.reachInsights?.accountsReached ?? null,
+      impressions: summaryMeta.reachInsights?.impressions ?? null,
+      profileVisits: summaryMeta.reachInsights?.profileVisits ?? null,
+      externalLinkTaps: summaryMeta.reachInsights?.externalLinkTaps ?? null,
+      contentInteractions: summaryMeta.interactionInsights?.contentInteractions ?? null,
+      accountsEngaged: summaryMeta.interactionInsights?.accountsEngaged ?? null,
+      postInteractions: summaryMeta.interactionInsights?.postInteractions ?? null,
+      storyInteractions: summaryMeta.interactionInsights?.storyInteractions ?? null,
+      storyReplies: summaryMeta.interactionInsights?.storyReplies ?? null,
+      followsInRange: summaryMeta.audienceInsights?.followsInRange ?? null,
+      unfollowsInRange: summaryMeta.audienceInsights?.unfollowsInRange ?? null,
+      netFollowersInRange: summaryMeta.audienceInsights?.netFollowersInRange ?? null
+    },
+    insights: summaryMeta.audienceInsights || null,
     meta: {
       followersFiles: followerMatches.map((match) => ({ path: match.path, count: match.entries.length })),
       followingFiles: followingMatches.map((match) => ({ path: match.path, count: match.entries.length })),
@@ -586,12 +1048,42 @@ async function processSelectedFiles(fileList) {
   const followingMatches = [];
   let ignoredJsonCount = 0;
   const categoryCounts = createCategoryCounts(jsonFiles);
+  let profile = null;
+  let insightDateRangeLabel = "";
+  let audienceInsights = null;
+  let reachInsights = null;
+  let interactionInsights = null;
   for (const file of jsonFiles) {
     let parsed;
     try {
       parsed = JSON.parse(await file.text());
     } catch {
       continue;
+    }
+    if (!profile && /(^|\/)personal_information\/personal_information\/personal_information\.json$/i.test(normalizePathForMatch(file))) {
+      profile = extractProfileFromPersonalInfo(parsed);
+      continue;
+    }
+    if (!audienceInsights && /(^|\/)logged_information\/past_instagram_insights\/audience_insights\.json$/i.test(normalizePathForMatch(file))) {
+      audienceInsights = extractAudienceInsights(parsed);
+      if (!insightDateRangeLabel && audienceInsights?.dateRangeLabel) {
+        insightDateRangeLabel = audienceInsights.dateRangeLabel;
+      }
+    }
+    if (!reachInsights && /(^|\/)logged_information\/past_instagram_insights\/profiles_reached\.json$/i.test(normalizePathForMatch(file))) {
+      reachInsights = extractReachInsights(parsed);
+      if (!insightDateRangeLabel && reachInsights?.dateRangeLabel) {
+        insightDateRangeLabel = reachInsights.dateRangeLabel;
+      }
+    }
+    if (!interactionInsights && /(^|\/)logged_information\/past_instagram_insights\/content_interactions\.json$/i.test(normalizePathForMatch(file))) {
+      interactionInsights = extractInteractionInsights(parsed);
+      if (!insightDateRangeLabel && interactionInsights?.dateRangeLabel) {
+        insightDateRangeLabel = interactionInsights.dateRangeLabel;
+      }
+    }
+    if (!insightDateRangeLabel) {
+      insightDateRangeLabel = extractInsightDateRange(parsed);
     }
     const classified = classifyInstagramJson(parsed, file);
     if (!classified) {
@@ -620,13 +1112,21 @@ async function processSelectedFiles(fileList) {
       : "selected files";
 
   const detectedDataLabel = summarizeDetectedCategories(categoryCounts);
+  if (profile?.profilePhotoPath) {
+    profile.profilePhotoDataUrl = await resolveProfilePhotoDataUrl(profile.profilePhotoPath, expandedFiles, files);
+  }
 
   renderStagedUpload(buildUploadPayload(followerMatches, followingMatches, {
     sourceLabel,
     detectedDataLabel,
     scannedJsonCount: jsonFiles.length,
     ignoredJsonCount,
-    categoryCounts: [...categoryCounts.entries()]
+    categoryCounts: [...categoryCounts.entries()],
+    profile,
+    insightDateRangeLabel,
+    audienceInsights,
+    reachInsights,
+    interactionInsights
   }));
   setUploadStatus("Upload ready. Review the summary below, then continue to dataset details.", "success");
 }
@@ -634,7 +1134,98 @@ async function processSelectedFiles(fileList) {
 function selectDataset(id) {
   saveActiveDatasetId(id);
   activeMainView = "workspace";
+  activeWorkspaceDetail = "";
   renderAll();
+}
+
+function getWorkspaceDetailConfig(dataset, detail) {
+  if (!dataset || !detail) return null;
+
+  const rangeLabel = dataset.scope?.insightDateRangeLabel || "range not detected";
+
+  if (detail === "followers") {
+    return {
+      kicker: "instagram insights",
+      title: "followers",
+      copy: "This is the follower total pulled from Instagram insights in the imported export.",
+      primaryLabel: "follower total",
+      primaryValue: formatOptionalCount(dataset.metrics?.followerTotalFromInsights),
+      note: "This card is insight-backed. Relationship-based follower records are still kept separately for tool logic.",
+      supporting: [
+        {
+          label: "follows in range",
+          value: formatOptionalCount(dataset.metrics?.followsInRange),
+          available: hasMetricValue(dataset.metrics?.followsInRange),
+          tone: "positive",
+          mark: "↗"
+        },
+        {
+          label: "unfollows in range",
+          value: formatOptionalCount(dataset.metrics?.unfollowsInRange),
+          available: hasMetricValue(dataset.metrics?.unfollowsInRange),
+          tone: "negative",
+          mark: "↘"
+        },
+        {
+          label: "net follower change",
+          value: formatOptionalCount(dataset.metrics?.netFollowersInRange),
+          available: hasMetricValue(dataset.metrics?.netFollowersInRange),
+          tone: getMetricTrendTone(dataset.metrics?.netFollowersInRange),
+          mark: Number(dataset.metrics?.netFollowersInRange) > 0 ? "+" : Number(dataset.metrics?.netFollowersInRange) < 0 ? "−" : "•"
+        },
+        { label: "detected range", value: rangeLabel, available: true }
+      ]
+    };
+  }
+
+  return null;
+}
+
+function renderWorkspaceDetail(dataset, ui = getUi()) {
+  const detailConfig = getWorkspaceDetailConfig(dataset, activeWorkspaceDetail);
+  const showDetail = Boolean(detailConfig);
+
+  if (ui.workspaceHead instanceof HTMLElement) {
+    ui.workspaceHead.hidden = showDetail;
+  }
+
+  if (ui.workspaceOverviewBody instanceof HTMLElement) {
+    ui.workspaceOverviewBody.hidden = showDetail;
+  }
+
+  if (ui.workspaceDetailView instanceof HTMLElement) {
+    ui.workspaceDetailView.hidden = !showDetail;
+  }
+
+  if (!showDetail) return;
+
+  if (ui.workspaceDetailKicker) ui.workspaceDetailKicker.textContent = detailConfig.kicker;
+  if (ui.workspaceDetailTitle) ui.workspaceDetailTitle.textContent = detailConfig.title;
+  if (ui.workspaceDetailCopy) ui.workspaceDetailCopy.textContent = detailConfig.copy;
+  if (ui.workspaceDetailPrimaryLabel) ui.workspaceDetailPrimaryLabel.textContent = detailConfig.primaryLabel;
+  if (ui.workspaceDetailPrimaryValue) ui.workspaceDetailPrimaryValue.textContent = detailConfig.primaryValue;
+
+  if (ui.workspaceDetailGrid instanceof HTMLElement) {
+    const visibleSupporting = detailConfig.supporting.filter((item) => item.available !== false);
+    ui.workspaceDetailGrid.innerHTML = visibleSupporting
+      .map(
+        (item) => `
+          <article class="dataset-detail-card">
+            <span class="dataset-meta-label">${escapeHtml(item.label)}</span>
+            <strong class="dataset-overview-value${item.tone ? ` is-${escapeHtml(item.tone)}` : ""}">
+              ${item.mark ? `<span class="dataset-detail-value-mark is-${escapeHtml(item.tone || "neutral")}">${escapeHtml(item.mark)}</span>` : ""}
+              <span>${escapeHtml(item.value)}</span>
+            </strong>
+          </article>
+        `
+      )
+      .join("");
+  }
+
+  if (ui.workspaceDetailNote instanceof HTMLElement) {
+    ui.workspaceDetailNote.hidden = !detailConfig.note;
+    ui.workspaceDetailNote.textContent = detailConfig.note || "";
+  }
 }
 
 function createDatasetFromStage() {
@@ -655,6 +1246,9 @@ function createDatasetFromStage() {
     createdAt: createdAt || new Date().toISOString().slice(0, 10),
     followersData: stagedUpload.followersData,
     followingData: stagedUpload.followingData,
+    profile: stagedUpload.profile || null,
+    scope: stagedUpload.scope || {},
+    metrics: stagedUpload.metrics || {},
     meta: stagedUpload.meta,
     createdAtMs: Date.now()
   };
@@ -794,15 +1388,75 @@ function wireDatasetList() {
   document.addEventListener("click", (event) => {
     const target = event.target;
     if (!(target instanceof HTMLElement)) return;
-    const datasetCard = target.closest("[data-dataset-id]");
-    if (!(datasetCard instanceof HTMLButtonElement)) return;
-    selectDataset(datasetCard.dataset.datasetId || "");
+
+    const renameButton = target.closest("[data-dataset-rename]");
+    if (renameButton instanceof HTMLButtonElement) {
+      renameDataset(renameButton.dataset.datasetRename || "");
+      return;
+    }
+
+    const deleteButton = target.closest("[data-dataset-delete]");
+    if (deleteButton instanceof HTMLButtonElement) {
+      deleteDataset(deleteButton.dataset.datasetDelete || "");
+      return;
+    }
+
+    const menuToggle = target.closest("[data-dataset-menu-toggle]");
+    if (menuToggle instanceof HTMLButtonElement) {
+      toggleDatasetMenu(menuToggle.dataset.datasetMenuToggle || "");
+      return;
+    }
+
+    const datasetSelect = target.closest("[data-dataset-select]");
+    if (datasetSelect instanceof HTMLButtonElement) {
+      openDatasetMenuId = "";
+      selectDataset(datasetSelect.dataset.datasetSelect || "");
+      return;
+    }
+
+    if (!target.closest(".dataset-card-actions")) {
+      openDatasetMenuId = "";
+      renderDatasetList();
+    }
   });
 }
 
 function wireHomePanelToggle() {
   document.querySelectorAll("[data-show-home]").forEach((button) => {
     button.addEventListener("click", showHomePanel);
+  });
+}
+
+function wireWorkspaceDetails() {
+  document.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+
+    const backButton = target.closest("[data-workspace-detail-back]");
+    if (backButton instanceof HTMLButtonElement) {
+      activeWorkspaceDetail = "";
+      renderAll();
+      return;
+    }
+
+    const detailTrigger = target.closest("[data-workspace-detail-trigger]");
+    if (detailTrigger instanceof HTMLElement) {
+      activeWorkspaceDetail = detailTrigger.dataset.workspaceDetailTrigger || "";
+      renderAll();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    if (event.key !== "Enter" && event.key !== " ") return;
+
+    const detailTrigger = target.closest("[data-workspace-detail-trigger]");
+    if (!(detailTrigger instanceof HTMLElement)) return;
+
+    event.preventDefault();
+    activeWorkspaceDetail = detailTrigger.dataset.workspaceDetailTrigger || "";
+    renderAll();
   });
 }
 
@@ -829,6 +1483,7 @@ wireUploadFlow();
 wireModal();
 wireDatasetList();
 wireHomePanelToggle();
+wireWorkspaceDetails();
 renderAll();
 
 document.getElementById("toggle-theme")?.addEventListener("click", () => {

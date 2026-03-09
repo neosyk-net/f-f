@@ -245,7 +245,7 @@
                     </section>
             </main>
             <section class="panel dataset-overview-shell" data-workspace-view hidden aria-label="Dataset workspace overview">
-                <div class="dataset-overview-head">
+                <div class="dataset-overview-head" data-workspace-head>
                     <div>
                         <p class="section-kicker">dataset overview</p>
                         <h2 class="dataset-overview-title" data-workspace-dataset-name>active dataset</h2>
@@ -256,20 +256,124 @@
                     </div>
                 </div>
 
-                <div class="dataset-overview-intro">
-                    <p class="dataset-overview-copy">
-                        use the workspace panel to open available tools.
-                    </p>
-                </div>
+                <div class="dataset-overview-body" data-workspace-overview-body>
+                    <div class="dataset-overview-intro">
+                        <p class="dataset-overview-copy">
+                            current account stats from this imported instagram export.
+                        </p>
+                    </div>
 
-                <div class="dataset-overview-grid">
-                    <div class="dataset-overview-card">
-                        <span class="dataset-meta-label">followers</span>
+                    <div class="dataset-profile-band">
+                        <a
+                            href="https://www.instagram.com/"
+                            class="dataset-profile-link"
+                            data-workspace-profile-link
+                            target="_blank"
+                            rel="noreferrer noopener"
+                            aria-label="Open Instagram profile"
+                            hidden
+                        >
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <rect x="3" y="3" width="18" height="18" rx="5"></rect>
+                                <circle cx="12" cy="12" r="4"></circle>
+                                <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"></circle>
+                            </svg>
+                        </a>
+                        <div class="dataset-profile-avatar-shell">
+                            <img
+                                src="./assets/favicon.png"
+                                alt=""
+                                class="dataset-profile-avatar"
+                                data-workspace-profile-photo
+                            />
+                        </div>
+                        <div class="dataset-profile-copy">
+                            <p class="dataset-profile-handle" data-workspace-username>@instagram</p>
+                            <h3 class="dataset-profile-name" data-workspace-display-name>display name not found</h3>
+                            <p class="dataset-profile-range" data-workspace-range>insight range not detected</p>
+                        </div>
+                    </div>
+
+                    <div class="dataset-overview-grid">
+                    <div class="dataset-overview-card is-detail-ready" data-workspace-detail-trigger="followers" role="button" tabindex="0" aria-label="Open followers detail view">
+                        <span class="dataset-overview-corner" aria-hidden="true">
+                            <svg viewBox="0 0 24 24"><path d="M8 16 16 8"></path><path d="M9 8h7v7"></path></svg>
+                        </span>
+                        <span class="dataset-meta-label dataset-meta-label-with-help">
+                            <span
+                                class="metric-help"
+                                data-tip="Follower total from Instagram insights in this export."
+                                tabindex="0"
+                                aria-label="About followers"
+                            >followers</span>
+                        </span>
                         <strong class="dataset-overview-value" data-workspace-followers>0</strong>
                     </div>
                     <div class="dataset-overview-card">
-                        <span class="dataset-meta-label">following</span>
-                        <strong class="dataset-overview-value" data-workspace-following>0</strong>
+                        <span class="dataset-meta-label dataset-meta-label-with-help">
+                            <span
+                                class="metric-help"
+                                data-tip="Accounts reached during the detected insight range."
+                                tabindex="0"
+                                aria-label="About accounts reached"
+                            >accounts reached</span>
+                        </span>
+                        <strong class="dataset-overview-value" data-workspace-accounts-reached>0</strong>
+                    </div>
+                    <div class="dataset-overview-card">
+                        <span class="dataset-meta-label dataset-meta-label-with-help">
+                            <span
+                                class="metric-help"
+                                data-tip="Profile visits during the detected insight range."
+                                tabindex="0"
+                                aria-label="About profile visits"
+                            >profile visits</span>
+                        </span>
+                        <strong class="dataset-overview-value" data-workspace-profile-visits>0</strong>
+                    </div>
+                    <div class="dataset-overview-card">
+                        <span class="dataset-meta-label dataset-meta-label-with-help">
+                            <span
+                                class="metric-help"
+                                data-tip="External link taps during the detected insight range."
+                                tabindex="0"
+                                aria-label="About external link taps"
+                            >external link taps</span>
+                        </span>
+                        <strong class="dataset-overview-value" data-workspace-external-link-taps>0</strong>
+                    </div>
+                    <div class="dataset-overview-card">
+                        <span class="dataset-meta-label dataset-meta-label-with-help">
+                            <span
+                                class="metric-help"
+                                data-tip="Content interactions during the detected insight range."
+                                tabindex="0"
+                                aria-label="About content interactions"
+                            >content interactions</span>
+                        </span>
+                        <strong class="dataset-overview-value" data-workspace-content-interactions>0</strong>
+                    </div>
+                    <div class="dataset-overview-card">
+                        <span class="dataset-meta-label dataset-meta-label-with-help">
+                            <span
+                                class="metric-help"
+                                data-tip="Accounts engaged during the detected insight range."
+                                tabindex="0"
+                                aria-label="About accounts engaged"
+                            >accounts engaged</span>
+                        </span>
+                        <strong class="dataset-overview-value" data-workspace-accounts-engaged>0</strong>
+                    </div>
+                    <div class="dataset-overview-card">
+                        <span class="dataset-meta-label dataset-meta-label-with-help">
+                            <span
+                                class="metric-help"
+                                data-tip="Impressions during the detected insight range."
+                                tabindex="0"
+                                aria-label="About impressions"
+                            >impressions</span>
+                        </span>
+                        <strong class="dataset-overview-value" data-workspace-impressions>0</strong>
                     </div>
                     <div class="dataset-overview-card">
                         <span class="dataset-meta-label">categories detected</span>
@@ -279,7 +383,30 @@
                         <span class="dataset-meta-label">import source</span>
                         <strong class="dataset-overview-value" data-workspace-source>not detected</strong>
                     </div>
+                    </div>
                 </div>
+
+                <section class="dataset-detail-view" data-workspace-detail-view hidden aria-label="Dataset detail view">
+                    <button type="button" class="dataset-detail-back" data-workspace-detail-back>
+                        <span aria-hidden="true">&larr;</span>
+                        <span>back to overview</span>
+                    </button>
+
+                    <div class="dataset-detail-head">
+                        <p class="section-kicker" data-workspace-detail-kicker>metric detail</p>
+                        <h3 class="dataset-detail-title" data-workspace-detail-title>detail title</h3>
+                        <p class="dataset-detail-copy" data-workspace-detail-copy>detail summary</p>
+                    </div>
+
+                    <div class="dataset-detail-primary">
+                        <span class="dataset-meta-label" data-workspace-detail-primary-label>primary metric</span>
+                        <strong class="dataset-detail-primary-value" data-workspace-detail-primary-value>0</strong>
+                    </div>
+
+                    <div class="dataset-detail-grid" data-workspace-detail-grid></div>
+
+                    <p class="dataset-detail-note" data-workspace-detail-note hidden></p>
+                </section>
             </section>
             </div>
 

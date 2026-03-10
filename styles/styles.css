@@ -3906,6 +3906,11 @@ button:hover {
   font-weight: 600;
   letter-spacing: 0.01em;
   font-size: 1.03rem;
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .username-copy {
@@ -3919,6 +3924,8 @@ button:hover {
   gap: 8px;
   justify-self: start;
   cursor: copy;
+  min-width: 0;
+  max-width: 100%;
   min-height: auto;
   height: auto;
 }
@@ -3957,6 +3964,7 @@ button:hover {
   display: inline-flex;
   gap: 10px;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .row-action-btn {

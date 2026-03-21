@@ -1122,6 +1122,14 @@ function openCreateModal() {
   if (ui.detailsDateInput instanceof HTMLInputElement) ui.detailsDateInput.value = today;
 }
 
+function consumeOpenCreateModalRequest() {
+  const url = new URL(window.location.href);
+  if (url.searchParams.get("openCreateModal") !== "1") return false;
+  url.searchParams.delete("openCreateModal");
+  window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+  return true;
+}
+
 function closeCreateModal() {
   const { modal } = getUi();
   if (!(modal instanceof HTMLElement)) return;
@@ -1889,6 +1897,9 @@ if (activeMainView === "workspace" && !getActiveDataset()) {
 }
 wireUploadFlow();
 wireModal();
+if (consumeOpenCreateModalRequest()) {
+  openCreateModal();
+}
 wireDatasetList();
 wireHomePanelToggle();
 wireWorkspaceDetails();

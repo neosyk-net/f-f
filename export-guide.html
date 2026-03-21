@@ -18,20 +18,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./styles/styles.css">
+    <script defer src="./script/vendor-fflate.js"></script>
+    <script defer src="./script/home-datasets.js"></script>
 </head>
 <body>
     <div class="page-shell guide-page">
-        <div class="bg-hex bg-hex-1" aria-hidden="true"></div>
-        <div class="bg-hex bg-hex-2" aria-hidden="true"></div>
-        <div class="bg-hex bg-hex-3" aria-hidden="true"></div>
-        <div class="bg-hex bg-hex-4" aria-hidden="true"></div>
-        <div class="bg-hex bg-hex-5" aria-hidden="true"></div>
-        <div class="bg-hex bg-hex-6" aria-hidden="true"></div>
-        <div class="bg-hex bg-hex-7" aria-hidden="true"></div>
-        <div class="bg-hex bg-hex-8" aria-hidden="true"></div>
-        <div class="bg-hex bg-hex-9" aria-hidden="true"></div>
-        <div class="bg-hex bg-hex-10" aria-hidden="true"></div>
-
         <div class="app-page">
             <nav class="top-nav panel" aria-label="Primary">
                 <div class="top-nav-brand">
@@ -53,96 +44,150 @@
                 </div>
             </nav>
 
-            <main class="guide-shell">
-                <section class="guide-hero panel">
-                    <p class="section-kicker">export guide</p>
-                    <h1 class="section-title">how to download your instagram data</h1>
-                    <p class="section-copy guide-hero-copy">
-                        This page is the detailed walkthrough for getting your Instagram export. The landing page stays focused on the product story; this guide handles the step-by-step help.
-                    </p>
-                    <div class="guide-actions">
-                        <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" class="hero-btn hero-btn-secondary">open instagram</a>
-                        <a href="./home.html" class="hero-btn hero-btn-primary">back to Instalyzer</a>
+            <main class="guide-shell guide-shell-v2">
+                <section class="guide-layout" aria-label="Instagram export guide">
+                    <div class="guide-main-column">
+                        <div class="guide-workbench">
+                            <aside class="guide-tabs-rail" aria-label="Guide modes">
+                                <p class="guide-tabs-rail-label">guide modes</p>
+                                <div class="guide-tab-list guide-tab-list-vertical" role="tablist" aria-label="Guide content tabs">
+                                    <button type="button" class="guide-tab-button is-active" role="tab" aria-selected="true" aria-controls="guide-panel-quick-steps" id="guide-tab-quick-steps" data-guide-tab="quick-steps">
+                                            <span class="guide-tab-button-title">quick guide</span>
+                                            <span class="guide-tab-button-copy">written guide</span>
+                                        </button>
+                                    <button type="button" class="guide-tab-button" role="tab" aria-selected="false" aria-controls="guide-panel-visual-guide" id="guide-tab-visual-guide" data-guide-tab="visual-guide" tabindex="-1">
+                                            <span class="guide-tab-button-title">visual guide</span>
+                                            <span class="guide-tab-button-copy">image flow</span>
+                                        </button>
+                                    <button type="button" class="guide-tab-button" role="tab" aria-selected="false" aria-controls="guide-panel-video" id="guide-tab-video" data-guide-tab="video" tabindex="-1">
+                                            <span class="guide-tab-button-title">video guide</span>
+                                            <span class="guide-tab-button-copy">walkthrough</span>
+                                        </button>
+                                </div>
+                            </aside>
+
+                            <section class="guide-tabs-shell" aria-labelledby="guide-help-title">
+                                <div class="guide-tabs-content">
+                                    <div class="guide-tabs-head">
+                                        <div class="guide-tabs-header-main">
+                                            <p class="section-kicker">help center</p>
+                                            <div class="guide-tabs-title-row">
+                                                <div class="guide-tabs-title-copy">
+                                                    <h1 id="guide-help-title" class="guide-panel-title guide-panel-title-page">download your instagram data</h1>
+                                                </div>
+                                            </div>
+                                            <p class="guide-panel-copy">follow the steps below, then upload your export into Instalyzer.</p>
+                                        </div>
+                                    </div>
+
+                                    <section class="guide-tab-panel is-active" role="tabpanel" id="guide-panel-quick-steps" aria-labelledby="guide-tab-quick-steps" data-guide-panel="quick-steps">
+                                        <h3 class="guide-panel-mode-title">quick guide</h3>
+                                        <div class="guide-step-surface">
+                                            <ol class="guide-step-grid">
+                                                <li class="guide-step-card-v2"><span class="guide-step-number-v2"><span class="guide-step-number-leading">0</span><span class="guide-step-number-accent">1</span></span><h4 class="guide-step-title-v2">open your instagram profile</h4><p class="guide-step-copy-v2">Log into <strong>Instagram</strong> on desktop and open your profile.</p></li>
+                                                <li class="guide-step-card-v2"><span class="guide-step-number-v2"><span class="guide-step-number-leading">0</span><span class="guide-step-number-accent">2</span></span><h4 class="guide-step-title-v2">go to settings</h4><p class="guide-step-copy-v2">Open the menu, then go to <strong>Settings</strong> and <strong>Accounts Center</strong>.</p></li>
+                                                <li class="guide-step-card-v2"><span class="guide-step-number-v2"><span class="guide-step-number-leading">0</span><span class="guide-step-number-accent">3</span></span><h4 class="guide-step-title-v2">open your information and permissions</h4><p class="guide-step-copy-v2">Find the section where Instagram lets you manage and <strong>download your data</strong>.</p></li>
+                                                <li class="guide-step-card-v2"><span class="guide-step-number-v2"><span class="guide-step-number-leading">0</span><span class="guide-step-number-accent">4</span></span><h4 class="guide-step-title-v2">select download your information</h4><p class="guide-step-copy-v2">Choose the option to request your <strong>Instagram export</strong>.</p></li>
+                                                <li class="guide-step-card-v2 is-accented"><span class="guide-step-number-v2"><span class="guide-step-number-leading">0</span><span class="guide-step-number-accent">5</span></span><h4 class="guide-step-title-v2">choose JSON and All time</h4><p class="guide-step-copy-v2">Set the format to <strong>JSON</strong>, choose <strong>All time</strong>, and keep media quality on <strong>Medium</strong>.</p></li>
+                                                <li class="guide-step-card-v2"><span class="guide-step-number-v2"><span class="guide-step-number-leading">0</span><span class="guide-step-number-accent">6</span></span><h4 class="guide-step-title-v2">download the ZIP and upload it</h4><p class="guide-step-copy-v2">When your file is ready, download the <strong>ZIP</strong> and come back to <strong>Instalyzer</strong> to upload it.</p></li>
+                                            </ol>
+                                        </div>
+                                        <div class="guide-primary-cta">
+                                            <button type="button" class="hero-btn hero-btn-primary guide-primary-cta-btn" data-open-create-modal>instalyze your data</button>
+                                            <p class="guide-primary-cta-note">your data stays private and secure.</p>
+                                        </div>
+                                    </section>
+
+                                    <section class="guide-tab-panel" role="tabpanel" id="guide-panel-visual-guide" aria-labelledby="guide-tab-visual-guide" data-guide-panel="visual-guide" hidden>
+                                        <h3 class="guide-panel-mode-title">visual guide</h3>
+                                        <div class="guide-visual-stage panel">
+                                            <div class="guide-visual-display">
+                                        <div class="guide-visual-card is-active" data-guide-visual-slide="0">
+                                            <div class="guide-visual-window"><div class="guide-visual-browser"><span></span><span></span><span></span></div><div class="guide-visual-body"><div class="guide-visual-sidebar"><span class="guide-visual-sidebar-item is-active"></span><span class="guide-visual-sidebar-item"></span><span class="guide-visual-sidebar-item"></span></div><div class="guide-visual-content"><div class="guide-visual-profile"></div><div class="guide-visual-row"></div><div class="guide-visual-row short"></div></div></div></div>
+                                        </div>
+                                        <div class="guide-visual-card" data-guide-visual-slide="1" hidden>
+                                            <div class="guide-visual-window"><div class="guide-visual-browser"><span></span><span></span><span></span></div><div class="guide-visual-body"><div class="guide-visual-settings-stack"><div class="guide-visual-settings-line long"></div><div class="guide-visual-settings-line"></div><div class="guide-visual-settings-line"></div><div class="guide-visual-settings-line"></div></div></div></div>
+                                        </div>
+                                        <div class="guide-visual-card" data-guide-visual-slide="2" hidden>
+                                            <div class="guide-visual-window"><div class="guide-visual-browser"><span></span><span></span><span></span></div><div class="guide-visual-body"><div class="guide-visual-panel-grid"><div class="guide-visual-panel-box tall"></div><div class="guide-visual-panel-box"></div><div class="guide-visual-panel-box"></div></div></div></div>
+                                        </div>
+                                        <div class="guide-visual-card" data-guide-visual-slide="3" hidden>
+                                            <div class="guide-visual-window"><div class="guide-visual-browser"><span></span><span></span><span></span></div><div class="guide-visual-body"><div class="guide-visual-download-list"><div class="guide-visual-download-row"></div><div class="guide-visual-download-row"></div><div class="guide-visual-download-row is-active"></div></div></div></div>
+                                        </div>
+                                        <div class="guide-visual-card" data-guide-visual-slide="4" hidden>
+                                            <div class="guide-visual-window"><div class="guide-visual-browser"><span></span><span></span><span></span></div><div class="guide-visual-body"><div class="guide-visual-setting-grid"><div class="guide-visual-setting-pill is-selected">JSON</div><div class="guide-visual-setting-pill">HTML</div><div class="guide-visual-setting-pill is-selected">All time</div><div class="guide-visual-setting-pill">Last year</div><div class="guide-visual-setting-pill is-selected">Medium</div><div class="guide-visual-setting-pill">High</div></div></div></div>
+                                        </div>
+                                        <div class="guide-visual-card" data-guide-visual-slide="5" hidden>
+                                            <div class="guide-visual-window"><div class="guide-visual-browser"><span></span><span></span><span></span></div><div class="guide-visual-body"><div class="guide-visual-upload-shell"><div class="guide-visual-upload-badge">ZIP</div><div class="guide-visual-upload-row"></div><div class="guide-visual-upload-cta"></div></div></div></div>
+                                        </div>
+                                    </div>
+                                    <div class="guide-visual-caption">
+                                        <div>
+                                            <p class="guide-visual-stepline" data-guide-visual-stepline>Step 1 of 6</p>
+                                            <h4 class="guide-visual-title" data-guide-visual-title>Open your profile</h4>
+                                            <p class="guide-visual-copy" data-guide-visual-copy>Start on your Instagram profile page so you can open the menu and settings from the main account view.</p>
+                                        </div>
+                                        <div class="guide-visual-controls">
+                                            <button type="button" class="guide-visual-nav" data-guide-visual-prev aria-label="Previous visual step">prev</button>
+                                            <button type="button" class="guide-visual-nav guide-visual-nav-next" data-guide-visual-next aria-label="Next visual step">next</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                    </section>
+
+                                    <section class="guide-tab-panel" role="tabpanel" id="guide-panel-video" aria-labelledby="guide-tab-video" data-guide-panel="video" hidden>
+                                        <h3 class="guide-panel-mode-title">video guide</h3>
+                                        <div class="guide-video-shell panel">
+                                            <div class="guide-video-frame" aria-hidden="true"><button type="button" class="guide-video-play"><span class="guide-video-play-icon"></span></button></div>
+                                    <div class="guide-video-copy-block">
+                                        <h4 class="guide-video-title">Full export walkthrough</h4>
+                                        <p class="guide-video-copy">Add a short screen recording here to show exactly where to click and which settings to choose. The tab stays useful now, and it is easy to swap in a real embed later.</p>
+                                    </div>
+                                </div>
+                                    </section>
+                                </div>
+                            </section>
+                        </div>
+
                     </div>
-                </section>
 
-                <section class="guide-grid" aria-label="Instagram export guide">
-                    <div class="guide-panel">
-                        <h2 class="guide-panel-title">written walkthrough</h2>
-                        <p class="guide-panel-copy">
-                            These steps are for Instagram on desktop. Once your file is ready, come back to <a href="./home.html" class="guide-inline-link">Instalyzer</a> and upload it to start analyzing your dataset.
-                        </p>
+                    <aside class="guide-side-stack guide-side-stack-v2">
+                        <p class="guide-side-stack-label">quick tips</p>
+                        <div class="guide-side-card guide-side-card-v2 guide-side-card-unified">
+                            <div class="guide-side-section">
+                                <div class="guide-side-section-head">
+                                    <h4 class="guide-side-section-title">before you start</h4>
+                                    <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" class="guide-inline-instagram-btn" aria-label="Open Instagram" title="Open Instagram">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                                            <rect x="3.5" y="3.5" width="17" height="17" rx="5"></rect>
+                                            <circle cx="12" cy="12" r="4"></circle>
+                                            <circle cx="17.6" cy="6.4" r="1"></circle>
+                                        </svg>
+                                    </a>
+                                </div>
+                                <ul class="guide-side-list">
+                                    <li>You may need to log into Instagram first.</li>
+                                    <li>Instagram may take a few minutes to prepare your file.</li>
+                                </ul>
+                            </div>
 
-                        <ol class="guide-step-list">
-                            <li class="guide-step-card">
-                                <div class="guide-step-topline">
-                                    <span class="guide-step-number">01</span>
-                                    <span class="guide-step-label">open your profile menu</span>
-                                </div>
-                                <p class="guide-step-copy">Go to your Instagram <strong>profile</strong> on desktop and click the <strong>three-line menu</strong> in the lower-left sidebar.</p>
-                            </li>
-                            <li class="guide-step-card">
-                                <div class="guide-step-topline">
-                                    <span class="guide-step-number">02</span>
-                                    <span class="guide-step-label">open settings</span>
-                                </div>
-                                <p class="guide-step-copy">Choose <strong>settings</strong>, then open the <strong>accounts center</strong> area if Instagram sends you there.</p>
-                            </li>
-                            <li class="guide-step-card">
-                                <div class="guide-step-topline">
-                                    <span class="guide-step-number">03</span>
-                                    <span class="guide-step-label">find your information</span>
-                                </div>
-                                <p class="guide-step-copy">Click <strong>your information and permissions</strong>, then select <strong>download your information</strong>.</p>
-                            </li>
-                            <li class="guide-step-card">
-                                <div class="guide-step-topline">
-                                    <span class="guide-step-number">04</span>
-                                    <span class="guide-step-label">choose the account and format</span>
-                                </div>
-                                <p class="guide-step-copy">Pick the Instagram <strong>account</strong> you want to export, choose the <strong>data range</strong> you need, and select <strong>JSON</strong> format before creating the file.</p>
-                            </li>
-                            <li class="guide-step-card">
-                                <div class="guide-step-topline">
-                                    <span class="guide-step-number">05</span>
-                                    <span class="guide-step-label">download the archive</span>
-                                </div>
-                                <p class="guide-step-copy">Once Instagram finishes preparing the export, download the <strong>zip</strong> directly from the page.</p>
-                            </li>
-                            <li class="guide-step-card">
-                                <div class="guide-step-topline">
-                                    <span class="guide-step-number">06</span>
-                                    <span class="guide-step-label">come back and upload it here</span>
-                                </div>
-                                <p class="guide-step-copy">Return to <strong>Instalyzer</strong>, click <strong>get started</strong>, and upload the downloaded export to build your dataset.</p>
-                            </li>
-                        </ol>
+                            <div class="guide-side-section">
+                                <h4 class="guide-side-section-title">recommended settings</h4>
+                                <ul class="guide-side-list">
+                                    <li><strong>Format:</strong> JSON</li>
+                                    <li><strong>Date range:</strong> All time</li>
+                                    <li><strong>Media quality:</strong> Medium</li>
+                                </ul>
+                            </div>
 
-                        <div class="guide-note">
-                            <h3 class="guide-side-title">quick note</h3>
-                            <p class="guide-note-copy">If Instagram changes the wording, look for paths related to <strong>your information</strong>, <strong>permissions</strong>, or <strong>downloading your data</strong>.</p>
-                        </div>
-                    </div>
-
-                    <aside class="guide-side-stack">
-                        <div class="guide-side-card">
-                            <h3 class="guide-side-title">recommended export settings</h3>
-                            <ul class="guide-side-list">
-                                <li><strong>Format:</strong> JSON</li>
-                                <li><strong>Date range:</strong> all time for relationship tools</li>
-                                <li><strong>Best use:</strong> upload once, reuse the dataset across tools</li>
-                            </ul>
-                        </div>
-
-                        <div class="guide-side-card">
-                            <h3 class="guide-side-title">what this page will grow into</h3>
-                            <p class="guide-side-copy">This is the dedicated help surface, so it can later include screenshots, short video guidance, and visual callouts without making the homepage feel too instructional.</p>
-                        </div>
-
-                        <div class="guide-side-card">
-                            <h3 class="guide-side-title">ready once your file is downloaded?</h3>
-                            <p class="guide-side-copy">Head back to the main product surface and upload your export to start exploring follower, visibility, and growth tools.</p>
-                            <a href="./home.html" class="guide-inline-link">return to Instalyzer</a>
+                            <div class="guide-side-section">
+                                <h4 class="guide-side-section-title">common issues</h4>
+                                <ul class="guide-side-list">
+                                    <li>No file? Check email and spam.</li>
+                                    <li>Wrong format? Use JSON.</li>
+                                    <li>Upload issue? Use the export ZIP file.</li>
+                                </ul>
+                            </div>
                         </div>
                     </aside>
                 </section>
@@ -150,32 +195,286 @@
         </div>
     </div>
 
+    <div class="modal-shell" data-create-modal hidden>
+        <div class="modal-backdrop" data-close-create-modal></div>
+        <div class="modal-panel panel" role="dialog" aria-modal="true" aria-labelledby="create-dataset-title">
+            <div class="modal-panel-scroll">
+            <div class="modal-head">
+                <div>
+                    <p class="section-kicker">create dataset</p>
+                    <h2 id="create-dataset-title" class="modal-title">import your export</h2>
+                </div>
+                <button type="button" class="modal-close" data-close-create-modal aria-label="Close create dataset modal">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6 18 18"></path><path d="M18 6 6 18"></path></svg>
+                </button>
+            </div>
+
+            <div class="modal-steps" aria-label="Create dataset steps">
+                <button type="button" class="modal-step is-active" data-modal-step-indicator="upload">1. upload</button>
+                <span class="modal-step-sep" aria-hidden="true">
+                    <svg viewBox="0 0 20 20">
+                        <path d="m7 4 6 6-6 6"></path>
+                    </svg>
+                </span>
+                <button type="button" class="modal-step" data-modal-step-indicator="review" disabled>2. review</button>
+                <span class="modal-step-sep" aria-hidden="true">
+                    <svg viewBox="0 0 20 20">
+                        <path d="m7 4 6 6-6 6"></path>
+                    </svg>
+                </span>
+                <button type="button" class="modal-step" data-modal-step-indicator="details" disabled>3. setup</button>
+            </div>
+
+            <section class="modal-stage" data-modal-stage="upload">
+                <div class="modal-copy-row">
+                    <p class="modal-copy">
+                        drop your instagram export <strong>zip</strong> or extracted export <strong>folder</strong>.
+                    </p>
+                    <button
+                        type="button"
+                        class="upload-status-pill is-error"
+                        data-upload-status-pill
+                        aria-describedby="upload-status"
+                    >
+                        <span class="upload-status-dot" aria-hidden="true"></span>
+                        <span data-upload-status-pill-label>no export</span>
+                    </button>
+                </div>
+
+                <div class="upload-panel" data-upload-panel>
+                    <input type="file" class="upload-input" data-upload-files accept=".json,.zip,application/json,application/zip" multiple hidden />
+                    <input type="file" class="upload-input" data-upload-folder webkitdirectory directory multiple hidden />
+
+                    <div class="upload-dropzone" data-upload-dropzone tabindex="0" role="button" aria-describedby="upload-help upload-status">
+                        <div class="upload-dropzone-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 16V4"></path>
+                                <path d="m7 9 5-5 5 5"></path>
+                                <path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"></path>
+                            </svg>
+                        </div>
+                        <p class="upload-dropzone-title">drop your export here</p>
+                        <p id="upload-help" class="upload-dropzone-copy">
+                            drag and drop your export, or select one below.
+                        </p>
+                        <div class="upload-actions">
+                            <button type="button" class="hero-btn hero-btn-primary" data-upload-trigger="files">choose export</button>
+                        </div>
+                        <p class="upload-help-link-row">
+                            <a href="./export-guide.html" class="guide-inline-link">don't have your export yet? how to download your instagram data</a>
+                        </p>
+                    </div>
+
+                    <p id="upload-status" class="visually-hidden" data-upload-status aria-live="polite" aria-atomic="true">
+                        waiting for files. nothing has been uploaded yet.
+                    </p>
+                    <div class="upload-stage-actions" data-upload-stage-actions hidden>
+                        <button type="button" class="upload-stage-reset" data-clear-staged-upload aria-label="Reset staged upload">reset</button>
+                        <p class="upload-ready-note upload-ready-note-success">
+                            <span class="upload-ready-check" aria-hidden="true">
+                                <svg viewBox="0 0 20 20">
+                                    <path d="m4.5 10 3.5 3.5L15.5 6"></path>
+                                </svg>
+                            </span>
+                            <span>export ready for review. upload again anytime to replace it.</span>
+                        </p>
+                        <button type="button" class="hero-btn hero-btn-secondary modal-nav-btn" data-back-to-review-from-upload>review</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="modal-stage" data-modal-stage="review" hidden>
+                <div class="review-stage-shell">
+                    <div class="upload-results" data-upload-results hidden>
+                        <div class="upload-capability-card upload-capability-card-primary">
+                            <h3 class="upload-capability-title">available tools</h3>
+                            <div class="tool-access-card" aria-label="Tool availability">
+                                <ul class="tool-access-list">
+                                    <li class="tool-access-item">
+                                        <span class="tool-access-icon" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24">
+                                                <path d="M12 3v12"></path>
+                                                <path d="m7 10 5 5 5-5"></path>
+                                                <path d="M5 21h14"></path>
+                                            </svg>
+                                        </span>
+                                        <span class="tool-access-copy">
+                                            <strong>Not Following Back</strong>
+                                            <span>available now</span>
+                                        </span>
+                                        <span class="tool-access-badge is-live">live</span>
+                                    </li>
+                                    <li class="tool-access-item">
+                                        <span class="tool-access-icon" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24">
+                                                <path d="M4 20h16"></path>
+                                                <path d="M7 20v-9"></path>
+                                                <path d="M12 20V4"></path>
+                                                <path d="M17 20v-6"></path>
+                                            </svg>
+                                        </span>
+                                        <span class="tool-access-copy">
+                                            <strong>Ghost Followers</strong>
+                                            <span>supported by this dataset later</span>
+                                        </span>
+                                        <span class="tool-access-badge">soon</span>
+                                    </li>
+                                    <li class="tool-access-item">
+                                        <span class="tool-access-icon" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24">
+                                                <path d="M6 18V8"></path>
+                                                <path d="M12 18V4"></path>
+                                                <path d="M18 18v-6"></path>
+                                            </svg>
+                                        </span>
+                                        <span class="tool-access-copy">
+                                            <strong>Activity Insights</strong>
+                                            <span>enabled by detected categories later</span>
+                                        </span>
+                                        <span class="tool-access-badge">soon</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="upload-summary-card">
+                            <p class="upload-result-label">import summary</p>
+                            <p class="upload-ready-copy" data-upload-ready-copy></p>
+                            <div class="upload-summary-grid">
+                                <div class="upload-summary-metric">
+                                    <span class="upload-summary-key">import source</span>
+                                    <strong class="upload-summary-value" data-upload-source>not detected</strong>
+                                </div>
+                                <div class="upload-summary-metric">
+                                    <span class="upload-summary-key">categories detected</span>
+                                    <strong class="upload-summary-value" data-upload-category-count>0</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="upload-ready-bar">
+                            <button type="button" class="hero-btn hero-btn-secondary modal-nav-btn" data-back-to-upload>back</button>
+                            <p class="upload-ready-note">next, set the dataset name and date.</p>
+                            <button type="button" class="hero-btn hero-btn-primary modal-nav-btn" data-go-dataset-details disabled>setup</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="modal-stage" data-modal-stage="details" hidden>
+                <div class="details-form-shell">
+                    <p class="modal-copy">
+                        name the dataset and set the date.
+                    </p>
+
+                    <div class="details-form-grid">
+                        <label class="field-label">
+                            <span class="field-label-text">dataset name</span>
+                            <input type="text" class="field-input" data-dataset-name-input maxlength="60" placeholder="export name" required />
+                            <span class="field-help field-help-error" data-dataset-name-error hidden>enter a name to continue</span>
+                        </label>
+
+                        <label class="field-label">
+                            <span class="field-label-text">created date</span>
+                            <input type="date" class="field-input" data-dataset-date-input />
+                            <span class="field-help" aria-hidden="true" hidden>&nbsp;</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="hero-btn hero-btn-secondary modal-nav-btn" data-back-to-review>back</button>
+                    <button type="button" class="hero-btn hero-btn-primary" data-create-dataset disabled>create dataset</button>
+                </div>
+            </section>
+            </div>
+        </div>
+    </div>
+
     <script>
         (() => {
-            const STORAGE_KEY_THEME = "ig_theme_v1";
+            const tabs = [...document.querySelectorAll("[data-guide-tab]")];
+            const panels = [...document.querySelectorAll("[data-guide-panel]")];
 
-            const button = document.getElementById("toggle-theme");
-            if (!(button instanceof HTMLButtonElement)) return;
+            const activateTab = (nextKey, focusTab = false) => {
+                tabs.forEach((tab) => {
+                    const active = tab.dataset.guideTab === nextKey;
+                    tab.classList.toggle("is-active", active);
+                    tab.setAttribute("aria-selected", active ? "true" : "false");
+                    tab.tabIndex = active ? 0 : -1;
+                    if (active && focusTab) tab.focus();
+                });
 
-            const setButton = (theme) => {
-                const label = theme === "dark" ? "Switch to light mode" : "Switch to dark mode";
-                button.setAttribute("aria-label", label);
-                button.setAttribute("title", label);
-                button.innerHTML =
-                    theme === "dark"
-                        ? '<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>'
-                        : '<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9"></path></svg>';
+                panels.forEach((panel) => {
+                    const active = panel.dataset.guidePanel === nextKey;
+                    panel.classList.toggle("is-active", active);
+                    panel.hidden = !active;
+                });
             };
 
-            let activeTheme = document.documentElement.dataset.theme === "dark" ? "dark" : "light";
-            setButton(activeTheme);
-
-            button.addEventListener("click", () => {
-                activeTheme = activeTheme === "dark" ? "light" : "dark";
-                document.documentElement.dataset.theme = activeTheme;
-                localStorage.setItem(STORAGE_KEY_THEME, activeTheme);
-                setButton(activeTheme);
+            tabs.forEach((tab, index) => {
+                tab.addEventListener("click", () => activateTab(tab.dataset.guideTab || ""));
+                tab.addEventListener("keydown", (event) => {
+                    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+                    event.preventDefault();
+                    const direction = event.key === "ArrowRight" ? 1 : -1;
+                    const nextIndex = (index + direction + tabs.length) % tabs.length;
+                    const nextTab = tabs[nextIndex];
+                    if (!(nextTab instanceof HTMLButtonElement)) return;
+                    activateTab(nextTab.dataset.guideTab || "", true);
+                });
             });
+
+            const visualSteps = [
+                {
+                    title: "Open your profile",
+                    copy: "Start on your Instagram profile page so you can open the menu and settings from the main account view."
+                },
+                {
+                    title: "Go to Settings",
+                    copy: "Use the Instagram menu to open Settings, then continue into Accounts Center if Instagram sends you there."
+                },
+                {
+                    title: "Open Accounts Center",
+                    copy: "Look for the area where Instagram groups account controls, privacy, and information settings."
+                },
+                {
+                    title: "Find Download your information",
+                    copy: "Open the section for your information and permissions, then choose the download option."
+                },
+                {
+                    title: "Choose the right export settings",
+                    copy: "Set the format to JSON, the date range to All time, and media quality to Medium."
+                },
+                {
+                    title: "Download the ZIP and return to Instalyzer",
+                    copy: "Once Instagram finishes preparing your file, download the ZIP and come back here to upload it."
+                }
+            ];
+
+            const visualCards = [...document.querySelectorAll("[data-guide-visual-slide]")];
+            const stepline = document.querySelector("[data-guide-visual-stepline]");
+            const title = document.querySelector("[data-guide-visual-title]");
+            const copy = document.querySelector("[data-guide-visual-copy]");
+            const prev = document.querySelector("[data-guide-visual-prev]");
+            const next = document.querySelector("[data-guide-visual-next]");
+            let activeVisualIndex = 0;
+
+            const renderVisualStep = (index) => {
+                activeVisualIndex = (index + visualSteps.length) % visualSteps.length;
+                visualCards.forEach((card, cardIndex) => {
+                    const active = cardIndex === activeVisualIndex;
+                    card.classList.toggle("is-active", active);
+                    card.hidden = !active;
+                });
+                if (stepline) stepline.textContent = `Step ${activeVisualIndex + 1} of ${visualSteps.length}`;
+                if (title) title.textContent = visualSteps[activeVisualIndex].title;
+                if (copy) copy.textContent = visualSteps[activeVisualIndex].copy;
+            };
+
+            if (prev instanceof HTMLButtonElement && next instanceof HTMLButtonElement) {
+                prev.addEventListener("click", () => renderVisualStep(activeVisualIndex - 1));
+                next.addEventListener("click", () => renderVisualStep(activeVisualIndex + 1));
+                renderVisualStep(0);
+            }
         })();
     </script>
 </body>

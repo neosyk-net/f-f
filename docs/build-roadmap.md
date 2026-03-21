@@ -188,6 +188,16 @@ The next highest-value sequence is:
 4. Finalize app sitemap
 5. Then migrate to Next.js
 
+## Current UX Focus
+
+The current static UX pass is now centered on finishing the export-support flow before migration:
+
+1. keep the written `help` / export guide as the visual reference
+2. replace the current visual-guide placeholders with real screenshot assets
+3. add the video walkthrough layer after the image flow is locked
+4. continue polishing the upload/create modal and core workspace surfaces
+5. only begin the Next.js migration once the static support and dataset flow feels clearly settled
+
 ## What Not To Do Yet
 
 Do not do these before the schema and page structure are clearer:

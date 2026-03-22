@@ -194,7 +194,7 @@ The current static UX pass is now centered on finishing the export-support flow 
 
 1. keep the written `help` / export guide as the visual reference
 2. replace the current visual-guide placeholders with real screenshot assets
-3. add the video walkthrough layer after the image flow is locked
+3. keep the guide intentionally focused on `quick guide` + `visual guide` after dropping the planned video layer
 4. continue polishing the upload/create modal and core workspace surfaces
 5. only begin the Next.js migration once the static support and dataset flow feels clearly settled
 

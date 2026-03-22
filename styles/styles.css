@@ -4947,16 +4947,14 @@ a.workspace-tool-pill.is-disabled:focus-visible {
 }
 
 .guide-tab-title,
-.guide-visual-title,
-.guide-video-title {
+.guide-visual-title {
   margin: 0;
   font-size: 1.12rem;
   line-height: 1.15;
   font-weight: 700;
 }
 
-.guide-visual-copy,
-.guide-video-copy {
+.guide-visual-copy {
   margin: 0;
   color: var(--ink-soft);
   font-size: 0.86rem;
@@ -5257,8 +5255,7 @@ a.workspace-tool-pill.is-disabled:focus-visible {
   line-height: 1.48;
 }
 
-.guide-visual-stage,
-.guide-video-shell {
+.guide-visual-stage {
   display: grid;
   gap: 18px;
   padding: 18px;
@@ -5277,8 +5274,7 @@ a.workspace-tool-pill.is-disabled:focus-visible {
   background: transparent;
 }
 
-.guide-visual-display,
-.guide-video-frame {
+.guide-visual-display {
   position: relative;
   width: min(760px, 100%);
   aspect-ratio: 4 / 3;
@@ -5457,41 +5453,6 @@ a.workspace-tool-pill.is-disabled:focus-visible {
   right: 18px;
 }
 
-.guide-video-shell {
-  grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
-  align-items: center;
-}
-
-.guide-video-frame {
-  display: grid;
-  place-items: center;
-  background:
-    radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--accent) 18%, transparent) 0%, transparent 34%),
-    linear-gradient(180deg, color-mix(in srgb, var(--bg-panel) 98%, transparent) 0%, color-mix(in srgb, var(--bg-panel) 90%, transparent) 100%);
-}
-
-.guide-video-play {
-  width: 88px;
-  height: 88px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--line));
-  background: color-mix(in srgb, var(--accent) 14%, var(--bg-panel));
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: default;
-}
-
-.guide-video-play-icon {
-  width: 0;
-  height: 0;
-  margin-left: 5px;
-  border-top: 14px solid transparent;
-  border-bottom: 14px solid transparent;
-  border-left: 22px solid var(--accent-ink);
-}
-
-.guide-video-copy-block,
 .guide-side-stack-v2 {
   display: grid;
   gap: 12px;
@@ -5508,10 +5469,12 @@ a.workspace-tool-pill.is-disabled:focus-visible {
 
 .guide-side-cta {
   display: grid;
+  justify-items: center;
+  padding-top: 8px;
 }
 
 .guide-side-cta-btn {
-  width: 100%;
+  width: min(100%, 220px);
 }
 
 .guide-primary-cta {
@@ -5521,8 +5484,34 @@ a.workspace-tool-pill.is-disabled:focus-visible {
   padding-top: 18px;
 }
 
+.guide-primary-cta-note-only {
+  position: relative;
+  gap: 0;
+  padding-top: 14px;
+}
+
+.guide-primary-cta-note-quick {
+  margin-top: 2px;
+  padding-top: 12px;
+}
+
+.guide-primary-cta-note-quick::before {
+  content: "";
+  width: 40%;
+  min-width: 140px;
+  max-width: 220px;
+  height: 1px;
+  margin: 0 auto 10px;
+  background: color-mix(in srgb, var(--line) 56%, transparent);
+}
+
 .guide-primary-cta-visual {
   padding-top: 8px;
+}
+
+.guide-primary-cta-note-visual {
+  padding-top: 0;
+  margin-top: -2px;
 }
 
 .guide-primary-cta-btn {
@@ -5641,7 +5630,6 @@ a.workspace-tool-pill.is-disabled:focus-visible {
 @media (max-width: 1080px) {
   .guide-workbench,
   .guide-layout,
-  .guide-video-shell,
   .guide-bottom-cta,
   .guide-tabs-title-row {
     grid-template-columns: minmax(0, 1fr);
@@ -5703,8 +5691,7 @@ a.workspace-tool-pill.is-disabled:focus-visible {
     display: grid;
   }
 
-  .guide-visual-display,
-  .guide-video-frame {
+  .guide-visual-display {
     width: 100%;
     aspect-ratio: 4 / 3;
   }

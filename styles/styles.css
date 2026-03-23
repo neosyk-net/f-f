@@ -9,7 +9,7 @@
   --accent-ink: #1f5fb3;
   --danger: #b42318;
   --danger-soft: #ffe4e0;
-  --success: #2f9e44;
+  --success: #1f8f46;
   --field-bg: #ffffff;
   --list-bg: #fcfdff;
   --row-line: #e6ecf4;
@@ -67,7 +67,7 @@
   --accent-ink: #cfe1ff;
   --danger: #fca5a5;
   --danger-soft: #3a2323;
-  --success: #86efac;
+  --success: #4ade80;
   --field-bg: #1d232b;
   --list-bg: #1b2129;
   --row-line: #2d3743;
@@ -376,7 +376,6 @@ html.is-embedded-tool {
 }
 
 :root[data-theme="light"] .dataset-sidebar-copy strong,
-:root[data-theme="light"] .modal-copy strong,
 :root[data-theme="light"] .tutorial-guide-link,
 :root[data-theme="light"] .tutorial-guide-copy strong,
 :root[data-theme="light"] .tutorial-step-copy strong,
@@ -565,7 +564,8 @@ html.is-embedded-tool {
 
 .dataset-sidebar-copy strong,
 .modal-copy strong {
-  color: #7dd3fc;
+  color: inherit;
+  font-weight: 700;
 }
 
 .dataset-sidebar-actions {
@@ -1392,6 +1392,7 @@ a.workspace-tool-pill.is-disabled:focus-visible {
   background:
     radial-gradient(circle at 50% 22%, rgba(64, 64, 64, 0.06) 0%, transparent 34%),
     linear-gradient(180deg, rgba(18, 18, 18, 0.54) 0%, rgba(10, 10, 10, 0.68) 100%);
+  animation: modal-backdrop-in 180ms ease-out both;
 }
 
 .modal-panel {
@@ -1401,6 +1402,37 @@ a.workspace-tool-pill.is-disabled:focus-visible {
   margin: 18px auto;
   overflow: hidden;
   border-radius: 24px;
+  animation: modal-panel-in 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-origin: center;
+}
+
+@keyframes modal-backdrop-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modal-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-backdrop,
+  .modal-panel {
+    animation: none;
+  }
 }
 
 .modal-panel-scroll {
@@ -1514,7 +1546,8 @@ a.workspace-tool-pill.is-disabled:focus-visible {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: color-mix(in srgb, var(--accent) 70%, var(--ink-soft));
+  color: color-mix(in srgb, var(--ink-soft) 76%, white 8%);
+  opacity: 0.42;
 }
 
 .modal-step-sep svg {
@@ -1522,7 +1555,7 @@ a.workspace-tool-pill.is-disabled:focus-visible {
   height: 16px;
   fill: none;
   stroke: currentColor;
-  stroke-width: 2.1;
+  stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -2982,11 +3015,11 @@ a.workspace-tool-pill.is-disabled:focus-visible {
 
 .upload-dropzone {
   display: grid;
-  min-height: 328px;
+  min-height: 286px;
   width: 100%;
   justify-items: center;
-  gap: 16px;
-  padding: 40px 28px 58px;
+  gap: 14px;
+  padding: 34px 28px 40px;
   text-align: center;
   cursor: pointer;
   outline: none;
@@ -3046,7 +3079,7 @@ a.workspace-tool-pill.is-disabled:focus-visible {
 }
 
 .upload-help-link-row {
-  margin: 2px 0 0;
+  margin: 14px 0 0;
   text-align: center;
 }
 
@@ -3061,8 +3094,9 @@ a.workspace-tool-pill.is-disabled:focus-visible {
 }
 
 .upload-status-pill {
-  min-height: 38px;
-  padding: 0 14px;
+  width: 38px;
+  height: 38px;
+  padding: 0;
   margin-bottom: 4px;
   border-radius: 999px;
   border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
@@ -3070,44 +3104,43 @@ a.workspace-tool-pill.is-disabled:focus-visible {
   color: var(--ink-soft);
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  font-size: 0.88rem;
-  font-weight: 700;
-  text-transform: lowercase;
-  cursor: default;
+  justify-content: center;
+  gap: 0;
+  flex: 0 0 38px;
+  cursor: help;
 }
 
 .upload-status-dot {
   width: 9px;
   height: 9px;
   border-radius: 999px;
-  background: #ef4444;
-  box-shadow: 0 0 0 4px color-mix(in srgb, #ef4444 20%, transparent);
+  background: #dc2626;
+  box-shadow: 0 0 0 4px color-mix(in srgb, #dc2626 24%, transparent);
   flex: 0 0 auto;
 }
 
 .upload-status-pill.is-success {
   color: var(--success);
-  border-color: color-mix(in srgb, var(--success) 28%, var(--line));
-  background: color-mix(in srgb, var(--success) 8%, var(--bg-panel));
+  border-color: color-mix(in srgb, var(--success) 38%, var(--line));
+  background: color-mix(in srgb, var(--success) 12%, var(--bg-panel));
 }
 
 .upload-status-pill.is-success .upload-status-dot {
   background: var(--success);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--success) 16%, transparent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--success) 24%, transparent);
 }
 
 .upload-status-pill.is-error,
 .upload-status-pill.is-neutral {
-  color: #fca5a5;
-  border-color: color-mix(in srgb, #ef4444 34%, var(--line));
-  background: color-mix(in srgb, #ef4444 10%, var(--bg-panel));
+  color: #dc2626;
+  border-color: color-mix(in srgb, #dc2626 40%, var(--line));
+  background: color-mix(in srgb, #dc2626 11%, var(--bg-panel));
 }
 
 .upload-status-pill.is-error .upload-status-dot,
 .upload-status-pill.is-neutral .upload-status-dot {
-  background: #ef4444;
-  box-shadow: 0 0 0 4px color-mix(in srgb, #ef4444 20%, transparent);
+  background: #dc2626;
+  box-shadow: 0 0 0 4px color-mix(in srgb, #dc2626 24%, transparent);
 }
 
 .upload-ready-copy {
@@ -5294,6 +5327,11 @@ a.workspace-tool-pill.is-disabled:focus-visible {
   overflow: hidden;
 }
 
+.guide-visual-display:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  outline-offset: 3px;
+}
+
 .guide-visual-card {
   position: absolute;
   inset: 0;
@@ -5470,11 +5508,16 @@ a.workspace-tool-pill.is-disabled:focus-visible {
 .guide-side-cta {
   display: grid;
   justify-items: center;
+  gap: 10px;
   padding-top: 8px;
 }
 
 .guide-side-cta-btn {
   width: min(100%, 220px);
+}
+
+.guide-side-cta-note {
+  text-align: center;
 }
 
 .guide-primary-cta {

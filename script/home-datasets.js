@@ -737,6 +737,7 @@ function getUi() {
     uploadStatus: document.querySelector("[data-upload-status]"),
     uploadStatusPill: document.querySelector("[data-upload-status-pill]"),
     uploadStatusPillLabel: document.querySelector("[data-upload-status-pill-label]"),
+    uploadHelpLinkRow: document.querySelector(".upload-help-link-row"),
     uploadStageActions: document.querySelector("[data-upload-stage-actions]"),
     uploadResults: document.querySelector("[data-upload-results]"),
     uploadReadyCopy: document.querySelector("[data-upload-ready-copy]"),
@@ -752,26 +753,27 @@ function setUploadStatus(message, tone = "neutral") {
   uploadStatus.classList.remove("is-success", "is-error");
   if (tone === "success") uploadStatus.classList.add("is-success");
   if (tone === "error") uploadStatus.classList.add("is-error");
+  const lowerMessage = message.toLowerCase();
+  const shortLabel =
+    tone === "success"
+      ? "export ready for review"
+      : tone === "error"
+        ? "upload issue"
+        : lowerMessage.includes("waiting")
+          ? "no export"
+          : "checking export";
 
   if (uploadStatusPill instanceof HTMLButtonElement) {
     uploadStatusPill.classList.remove("is-success", "is-error", "is-neutral");
     uploadStatusPill.classList.add(
       tone === "success" ? "is-success" : tone === "error" ? "is-error" : "is-neutral"
     );
-    uploadStatusPill.removeAttribute("title");
-    uploadStatusPill.setAttribute("aria-label", message);
+    uploadStatusPill.title = shortLabel;
+    uploadStatusPill.setAttribute("aria-label", shortLabel);
   }
 
   if (uploadStatusPillLabel instanceof HTMLElement) {
-    const lowerMessage = message.toLowerCase();
-    uploadStatusPillLabel.textContent =
-      tone === "success"
-        ? "upload ready"
-        : tone === "error"
-          ? "upload issue"
-          : lowerMessage.includes("waiting")
-            ? "no export"
-            : "checking";
+    uploadStatusPillLabel.textContent = shortLabel;
   }
 }
 
@@ -782,9 +784,10 @@ function setUploadResultsVisible(visible) {
 }
 
 function updateUploadStageActions() {
-  const { uploadStageActions } = getUi();
+  const { uploadStageActions, uploadHelpLinkRow } = getUi();
   if (!(uploadStageActions instanceof HTMLElement)) return;
   uploadStageActions.hidden = !stagedUpload;
+  if (uploadHelpLinkRow instanceof HTMLElement) uploadHelpLinkRow.hidden = Boolean(stagedUpload);
 }
 
 function updateCreateDatasetButtonState() {
@@ -1570,6 +1573,27 @@ function renderWorkspaceDetail(dataset, ui = getUi()) {
   }
 }
 
+function routeToDatasetOverview(datasetId) {
+  if (!datasetId) return;
+
+  saveActiveDatasetId(datasetId);
+  saveActiveMainView("workspace");
+  activeWorkspaceDetail = "";
+  activeWorkspacePanel = "overview";
+
+  const ui = getUi();
+  const hasWorkspaceSurface =
+    ui.datasetWorkspace instanceof HTMLElement &&
+    ui.workspaceView instanceof HTMLElement;
+
+  if (hasWorkspaceSurface) {
+    renderAll();
+    return;
+  }
+
+  window.location.href = "./home.html";
+}
+
 function createDatasetFromStage() {
   if (!stagedUpload || datasets.length >= MAX_GUEST_DATASETS) return;
   const ui = getUi();
@@ -1609,8 +1633,7 @@ function createDatasetFromStage() {
   }
   closeCreateModal();
   resetUploadUi();
-  saveActiveMainView("workspace");
-  selectDataset(dataset.id);
+  routeToDatasetOverview(dataset.id);
 }
 
 function wireUploadFlow() {

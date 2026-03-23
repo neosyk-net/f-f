@@ -770,19 +770,19 @@
             </div>
 
             <div class="modal-steps" aria-label="Create dataset steps">
-                <button type="button" class="modal-step is-active" data-modal-step-indicator="upload">1. upload</button>
+                <button type="button" class="modal-step is-active" data-modal-step-indicator="upload">upload</button>
                 <span class="modal-step-sep" aria-hidden="true">
                     <svg viewBox="0 0 20 20">
                         <path d="m7 4 6 6-6 6"></path>
                     </svg>
                 </span>
-                <button type="button" class="modal-step" data-modal-step-indicator="review" disabled>2. review</button>
+                <button type="button" class="modal-step" data-modal-step-indicator="review" disabled>review</button>
                 <span class="modal-step-sep" aria-hidden="true">
                     <svg viewBox="0 0 20 20">
                         <path d="m7 4 6 6-6 6"></path>
                     </svg>
                 </span>
-                <button type="button" class="modal-step" data-modal-step-indicator="details" disabled>3. setup</button>
+                <button type="button" class="modal-step" data-modal-step-indicator="details" disabled>setup</button>
             </div>
 
             <section class="modal-stage" data-modal-stage="upload">
@@ -797,7 +797,7 @@
                         aria-describedby="upload-status"
                     >
                         <span class="upload-status-dot" aria-hidden="true"></span>
-                        <span data-upload-status-pill-label>no export</span>
+                        <span class="visually-hidden" data-upload-status-pill-label>no export</span>
                     </button>
                 </div>
 
@@ -813,17 +813,16 @@
                                 <path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"></path>
                             </svg>
                         </div>
-                        <p class="upload-dropzone-title">drop your export here</p>
                         <p id="upload-help" class="upload-dropzone-copy">
                             drag and drop your export, or select one below.
                         </p>
                         <div class="upload-actions">
                             <button type="button" class="hero-btn hero-btn-primary" data-upload-trigger="files">choose export</button>
                         </div>
-                        <p class="upload-help-link-row">
-                            <a href="./export-guide.html" class="guide-inline-link">don&apos;t have your export yet? how to download your instagram data</a>
-                        </p>
                     </div>
+                    <p class="upload-help-link-row">
+                        <a href="./export-guide.html" class="guide-inline-link">how to download your instagram data</a>
+                    </p>
 
                     <p id="upload-status" class="visually-hidden" data-upload-status aria-live="polite" aria-atomic="true">
                         waiting for files. nothing has been uploaded yet.

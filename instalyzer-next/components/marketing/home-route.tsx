@@ -280,7 +280,7 @@ export function MarketingHomeRoute() {
           </p>
 
           <div className="hero-actions">
-            <Link href="/app/datasets/new" className="hero-btn hero-btn-primary">
+            <Link href="/app/datasets/new?entry=home-hero" className="hero-btn hero-btn-primary">
               get started
             </Link>
 
@@ -475,7 +475,10 @@ export function MarketingHomeRoute() {
           <p className="results-preview-cta-copy">
             ready to unlock your instagram insights?
           </p>
-          <Link href="/app/datasets/new" className="results-preview-cta-link">
+          <Link
+            href="/app/datasets/new?entry=home-results-preview"
+            className="results-preview-cta-link"
+          >
             instalyze your export
           </Link>
         </div>
@@ -524,7 +527,7 @@ export function MarketingHomeRoute() {
                 </ul>
 
                 <Link
-                  href="/app/datasets/new"
+                  href={`/app/datasets/new?entry=${`home-pricing-${plan.tier}`}`}
                   className={`pricing-card-btn ${plan.ctaClassName}`.trim()}
                 >
                   {plan.ctaLabel}
@@ -591,7 +594,10 @@ export function MarketingHomeRoute() {
         </div>
 
         <div className="final-cta-placeholder">
-          <Link href="/app/datasets/new" className="final-cta-placeholder-btn">
+          <Link
+            href="/app/datasets/new?entry=home-final-cta"
+            className="final-cta-placeholder-btn"
+          >
             instalyze your export
           </Link>
           <p

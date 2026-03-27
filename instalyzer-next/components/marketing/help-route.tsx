@@ -536,7 +536,7 @@ export function HelpRoute() {
 
           <div className="guide-side-cta">
             <Link
-              href="/app/datasets/new"
+              href="/app/datasets/new?entry=help-cta"
               className="hero-btn hero-btn-primary guide-primary-cta-btn guide-side-cta-btn"
             >
               instalyze your data

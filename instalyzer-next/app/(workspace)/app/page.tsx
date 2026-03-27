@@ -14,7 +14,7 @@ export default function AppHomePage() {
       ]}
       links={[
         { href: "/app/datasets", label: "Open datasets" },
-        { href: "/app/datasets/new", label: "Create dataset" },
+        { href: "/app/datasets/new?entry=app-home", label: "Create dataset" },
       ]}
     />
   );
